@@ -9,16 +9,14 @@
                     <mt-button @click="save">保存</mt-button>
                 </div>
             </mt-header>
-
             <loading ref="editInstance" @imgChanged="imgChanged" @getImageCropper="getImageCropper"></loading>
-
         </div>
     </transition>
 </template>
 
 <script>
     import {mapMutations} from 'vuex';
-    import getCropitData from '../../../service/getCropitData.js';
+    import getCropitData from '../../service/getCropitData.js';
 
     let imageCropper,
         imgIsChanged
@@ -29,7 +27,6 @@
             editorHeight: window.innerHeight,
             isShow: false
         }),
-
         props: [],
 
         methods: {
@@ -46,10 +43,12 @@
                     cropit: imgIsChanged,
                     ...state.editImgModule.customParams
                 });
-
-                this::$emit('editFinish', {postData, imgData: imageCropper.cropit('export')});
-
+				
+//              this::$emit('editFinish', {postData, imgData: imageCropper.cropit('export')});
+//              $emit('editFinish', {postData, imgData: imageCropper.cropit('export')}).bind(this)
+				this.$emit('editFinish', {postData, imgData: imageCropper.cropit('export')})
                 commit('hideEditor');
+//              imageCropper.cropit('imageSrc', "");
             },
             restoreImg(){
                 this.$refs.editInstance.restore()
@@ -61,7 +60,6 @@
                 imageCropper = ele;
             }
         },
-
         beforeCreate(){
             const vm = this;
             this.$store.registerModule(

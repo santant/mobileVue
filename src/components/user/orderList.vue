@@ -1,10 +1,10 @@
 <template>
 	<div id="orderList">
 		<mt-header title="我的订单">
-		  <router-link to="/" slot="left">
-		    <mt-button icon="back"></mt-button>
+		  <router-link to="" v-tap='{methods:linkGo}' slot="left">
+		    <mt-button icon="back">返回</mt-button>
 		  </router-link>
-		  <mt-button icon="more" slot="right"></mt-button>
+		  <mt-button icon="" slot="right"></mt-button>
 		</mt-header>
 		<div class="order" v-for="(itmes,indexs) in dataList">
 			<ul>
@@ -64,28 +64,55 @@
              	dataList:[]
             }
         },
+//      beforeRouteEnter(to,from,next){
+//			console.log(to)
+//			console.log(from)
+//			next()
+//		},
         methods: {
         	gotoOrderPay(params){ 
-                Api.car.cloneOrder({orderDbId:params.dbId, userDbId:localStorage.getItem("userDbId")}).then(res=>{
-                    if(res.data.code == 'success'){
-                        location.href="#payOrder?openId=&orderDbId="+params.dbId+"&userDbId="+localStorage.getItem("userDbId");
-                    } else {
-                        Toast('此订单数据错误，请联系客服！');
-                    }
-                    //console.log(res)
-                },err=>{
-                    Toast('数据请求错误');
-                })
+                var ordJson = {
+                    orderDbId:params.dbId, 
+                    userDbId:localStorage.getItem("userDbId")
+                }; 
+
+                Api.car.cloneOrder(ordJson).then(res=>{
+                     if(res.data.code == 'success'){
+                        var orderDbId = res.data.orderDbId;
+                        var openId = res.data.openId;
+                        var addressDbId = res.data.addressDbId;
+                        var userDbId = localStorage.getItem("userDbId");
+ 
+                         var payUrl = "#orderStatus?paymentType=WX&addressId="+addressDbId+"&dbId="+orderDbId+"&userDbId="+userDbId+"&openId="+openId; 
+                         location.href = payUrl; 
+                     } else {
+                         Toast('此订单数据错误，请联系客服！');
+                     }
+                     //console.log(res)
+                 },err=>{
+                     Toast('数据请求错误');
+                 })
 				
         	},
         	cancleOrder(params){
-        		Api.car.cancleOrder({dbId:params.dbId}).then(res=>{
-        			this.dataList[params.index].status = -1;
-        			this.dataList[params.index].orderState = '已取消';
-        			//console.log(res)
-        		},err=>{
-        			
-        		})
+        		
+        		
+        		MessageBox({
+					  title: '我的订单',
+					  message: '您确认取消该条订单吗？',
+					  showCancelButton: true
+					}).then((res)=>{
+						if(res=="confirm"){
+							Api.car.cancleOrder({dbId:params.dbId}).then(res=>{
+				        			this.dataList[params.index].status = -1;
+				        			this.dataList[params.index].orderState = '已取消';
+				        			//console.log(res)
+				        		},err=>{
+				        			Toast('数据请求错误');
+				        		})
+						}
+									
+					})
         	},
         	delectFn(params){ 
         		var jsons = {
@@ -118,11 +145,15 @@
 						}
 									
 					})
-        	}
+        		},
+	        linkGo(){
+				this.vurRouterGo();
+			}
         },
         mounted() {
         	Api.car.orderListStatus({userDbId:localStorage.getItem("userDbId")}).then(res=>{
         		this.dataList = res.data.results;
+        		console.log(this.dataList)
         		if(this.dataList.length < 1){
         			
         			MessageBox.alert('您当前没有任何订单请去创建').then(action => {

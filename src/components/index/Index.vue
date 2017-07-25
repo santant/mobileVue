@@ -26,21 +26,21 @@
 					</router-link>
 				</li>
 				<li> 
-					<router-link to="tlSelect?category=taili">
+					<router-link to="tlMsg?category=taili">
 						<i style="font-size: 3.1875rem;" class="icon iconfont">&#xe686;</i>
 						<p>台历</p>
 					</router-link>
 				</li>
 				<li>
-					<router-link to="khSelect?category=kuanghua">
+					<router-link to="khMsg?category=kuanghua">
 						<i style="font-size: 3.1875rem;" class="icon iconfont">&#xe628;</i>
 						<p>框画</p>
 					</router-link>
 				</li>
 				<li> 
-					<router-link to="">
+					<router-link to="hbMsg?category=haibao">
 						<i style="font-size: 3.1875rem;" class="icon iconfont">&#xe609;</i>
-						<p>其他产品</p>
+						<p>海报</p>
 					</router-link>
 				</li>				
 				<li> 
@@ -73,41 +73,53 @@ export default {
 //    'add','testBtn'
 //  ]),
     methods:{
-//	    	mapActions([
-//	      'add','testBtn'
-//	    ])
+		fetchData(){
+			//alert(this.$route.query.userDbId)
+			sessionStorage.setItem('urlQuery',JSON.stringify(this.$route.query))			
+			if (this.$route.query.userDbId) {
+				localStorage.setItem('userDbId',this.$route.query.userDbId)
+			}
+
+		}
     },
     mounted(){
 
     		Indicator.open({
-		  text: '加载中...',
-		  spinnerType: 'fading-circle'
-		});
-		if (JSON.stringify(this.$route.query)!="{}") { 
-			sessionStorage.setItem('urlQuery',JSON.stringify(this.$route.query))
-			if (this.$route.query.userDbId) {
-				localStorage.setItem('userDbId',this.$route.query.userDbId)
-			}			
-		}else{
+		  		text: '加载中...',
+		  		spinnerType: 'fading-circle'
+			});
+			 
+			Api.Index.reloadCache().then(res=>{   
+				if(res.data && res.data === 'Y'){ 
+					sessionStorage.clear(); 	
+					localStorage.clear();
+				}
+			})
 
-			if (!localStorage.getItem('userDbId')) {
-				//请求接口 //重新登录函数
-				Api.user.getUserDbId().then(res=>{
-					//请求微信授权
-					window.location.href=res.data.tokenUrl
-				})				
+			if (JSON.stringify(this.$route.query)!="{}") {  
+				this.fetchData();		
+			}else{
+				if (localStorage.getItem('userDbId') && localStorage.getItem('userDbId') != null && localStorage.getItem('userDbId') != '' && localStorage.getItem('userDbId') != 'null') {
+				} else {
+					
+					//请求接口 //重新登录函数
+					Api.user.getUserDbId().then(res=>{
+						//请求微信授权
+						window.location.href=res.data.tokenUrl
+					})
+				}
 			}
-		}
-		//首页请求的数据
-		Api.Index.indexImg().then(res=>{
 
-			this.indexImg = res.data.data;
-			Indicator.close();
+			//首页请求的数据
+			Api.Index.indexImg().then(res=>{ 
+				this.indexImg = res.data.data;
+				Indicator.close();
+			})
+	},
+	 watch:{
+        $route:'fetchData'
+     }
 
-		})
-		
-
-	}
 }
 </script>
 

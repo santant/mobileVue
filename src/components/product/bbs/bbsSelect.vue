@@ -8,8 +8,6 @@
 		<div class="bbsImg">
 			<img src="http://image2.artup.com/resources/static/img/bbs.png"/>
 		</div>
-		
-
 			<dl v-for="(item,index1) in bbs.attributes"  class="slect_dl">
 				<dt>
 					{{item.name}}选择
@@ -22,7 +20,7 @@
 		<i style="height: 2.9375rem; display: block; width: 100%;"></i>
 		<div class="cart_btn">			
 			<div class="price">
-				合计<span><b>¥</b>{{price}}</span></div> 
+				价格：<span><b>¥</b>{{price}}</span></div> 
 			<div  v-tap="{methods : nextPage}" class="crectOrder">
 				下一步
 			</div>
@@ -46,6 +44,9 @@
 			}
 		},
 		methods:{
+			fnd(){
+				this.$router.push({ path: 'register', query: { plan: 'private' }})
+			},
 			check(params){ //切换选项		
 				for (var i = 0; i < this.bbs.attributes.length; i++) {
 						for (var j = 0; j < this.bbs.attributes[i].attributeValues.length; j++) {
@@ -53,7 +54,7 @@
 							this.bbs.attributes[params.index1].attributeValues[params.index2].colorF = true;
 						}
 				}
-				$("#bbs-select .slect_dl > dd .dd_slectWidth").eq(params.index2).addClass("dd_active").siblings().removeClass("dd_active");
+				$("#bbs-select .slect_dl").eq(params.index1).find("dd .dd_slectWidth").eq(params.index2).addClass("dd_active").siblings().removeClass("dd_active");
 				//在次计算价格
 				this.getPrice($("#bbs-select .slect_dl > dd .dd_active"));
 			},
@@ -82,10 +83,15 @@
 					console.log(dataCode2)
 					//组装后端需要的数据暂存浏览器
 					this.bbsSlsectDate.name = this.bbs.name+'.'+dataCode2;
-					this.bbsSlsectDate.category =this.getFromSession("category"); //类型字段
-					console.log(this.getFromSession("category"))
+					this.bbsSlsectDate.skuCode = this.getFromSession("category")+'.'+dataCode;
+					this.bbsSlsectDate.category = this.getFromSession("category"); //类型字段
+					//console.log(this.getFromSession("category"))
+					var paramsJson = {
+						"category": this.getFromSession("category"),
+						"parameter" : dataCode
+					};
 				 	//请求价格:			
-					Api.baobaoshu.bbsPrice(`artup-build/builder/price.do?format=json&ignore=true&category=${this.bbsSlsectDate.category}&parameter=${dataCode}`).then((res)=>{
+					Api.sku.querySku(paramsJson).then((res)=>{
 						//价格计算
 						 this.price = res.data.price;
 						 this.bbsSlsectDate.price = res.data.price;
@@ -98,7 +104,10 @@
 			
 			//宝宝书选择作品
 			Indicator.open({text: '页面加载中...',spinnerType: 'fading-circle'});
-			Api.baobaoshu.bbsSelect("artup-build/builder/service/baobaoshu/attributes.do?format=json&ignore=true").then((res)=>{
+			var paraAttributeJson = {  
+				category: this.getFromSession("category") //类型
+			};
+			Api.sku.queryAttributes(paraAttributeJson).then((res)=>{
 				//添加1个titleName
 				 sessionStorage.setItem('titleName',res.data.name);
 				 this.bbs= res.data;
@@ -113,7 +122,17 @@
 			//开始默认的时候，去拿我的作品列表判断是否有未完成的作品
 			this.bbsSlsectDate.category =this.getFromSession("category"); //类型字段
 
-			Api.work.workList("artup-build/builder/cors/edit/queryByPage.do",1,0,this.bbsSlsectDate.category).then((res)=>{
+			var paraJson = { 
+				userDbId:localStorage.getItem('userDbId'),
+				status:1, //未完成1，已经完成2 
+				sortField:"createdDt",
+				pageSize:15,//每页多少条
+				pageNum:0, //第几页
+				order:"desc",
+				category: this.getFromSession("category") //类型
+			};
+
+			Api.work.workList(paraJson).then((res)=>{
 				if (res.data.results.length>0) {
 					MessageBox({
 					  title: '我的作品',
@@ -129,6 +148,12 @@
 					})
 				};				
 			})
+			//监听浏览器返回
+			window.addEventListener("popstate", function(e) {  
+		       MessageBox.close();
+		    }, false);
+			
+			
 		}
 	}
 </script>

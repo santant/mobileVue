@@ -84,15 +84,18 @@
 						<div class="bbsBtn">
 							<ul>
 								<li><p>第<span>{{index+1}}</span>页</p></li>
+								<li  v-if="index==0" class="switchBs"><a  style="border: none;" >6寸照片</a></li>
+								<li  v-if="index!=0" class="switchBs"><a style="border: none;" >lomo卡</a></li>
 							</ul>
 						</div>
 					</div>
 				</li>
 			</ul>
 		</div>
+		<i style="display: block;width: 100%;height: 0.9375rem;"></i>
 		<div class="cart_btn">
 			<div class="price">
-				合计<span><b>¥</b>{{bbs.oPrice}}</span></div>
+				价格：<span><b>¥</b>{{bbs.oPrice}}</span></div>
 			<div v-if="!previewPage" v-tap="{methods : editWork}" class="crectOrder">
 				保存作品
 			</div>
@@ -111,15 +114,15 @@
 		<!-- 更换板式弹出框 -->
 		<div v-if="selectBS" class="box_checkBS">
 			<mt-header title="板式选择">
-				<router-link to="/" slot="left">
-					<mt-button icon="back">返回</mt-button>
+				<router-link to="" slot="left">
+					<mt-button v-tap="{methods : blockBtn}" icon="back">返回</mt-button>
 				</router-link>
-				<router-link to="/" slot="right">
-					<mt-button   v-tap="{methods : nextBS}">下一步</mt-button>
+				<router-link to="" slot="right">
+					<mt-button   v-tap="{methods : nextBS}">确认</mt-button>
 				</router-link>
 			</mt-header>
 			<ul class="checkBS">
-				<li v-tap="{methods : selectMoban ,index : index}" v-for="(moban,index) in mobanArr"><img v-bind:src="moban"/></li>
+				<li v-tap="{methods : selectMoban ,index : index}" v-for="(moban,index) in dataImg.mobanArr"><img v-bind:src="moban"/></li>
 			</ul>
 		</div>
 		<!--弹出框-->
@@ -139,7 +142,7 @@
 				  position="bottom">
 			<div class="img_div">
 				<!--liActive-->
-				<ul>
+				<ul class="clearfix">
 					<li  v-tap="{methods : MaterialCheckImg ,index : index}"  :class="imgs.activeLi ? 'liActive ':'' " v-for="(imgs,index) in bbs.Material" >
 						<img :src="imgs.thumbnailUrl" >
 					</li>
@@ -149,12 +152,40 @@
 				</div>
 			</div>
 		</mt-popup>
-		<edit-img  @selectPreview="selectPreview" @editFinish="editFinish"></edit-img>
+		<edit-img  @selectPreview="selectPreview" @editFinish="editFinish"></edit-img>		
+		<!--新增加的上传提示-->
+		<div style="display: none;" id="loading_file" class="loading-popup">
+			<div class="loading_div">
+				<div class="spinner">
+				  <div class="spinner-container container1">
+				    <div class="circle1"></div>
+				    <div class="circle2"></div>
+				    <div class="circle3"></div>
+				    <div class="circle4"></div>
+				  </div>
+				  <div class="spinner-container container2">
+				    <div class="circle1"></div>
+				    <div class="circle2"></div>
+				    <div class="circle3"></div>
+				    <div class="circle4"></div>
+				  </div>
+				  <div class="spinner-container container3">
+				    <div class="circle1"></div>
+				    <div class="circle2"></div>
+				    <div class="circle3"></div>
+				    <div class="circle4"></div>
+				  </div>
+				</div>
+				<span>上传中...</span>
+			</div>
+		</div>
+		
 	</div>
 </template>
 <script>
     import { Toast ,Actionsheet,Popup,Indicator} from 'mint-ui';
     import Api from '../../../API.js'
+    let regx = /[#$&\^*》><《@#￥/]/ ;//验证非法字符的正则
     export default{
         data () {
             return {
@@ -162,9 +193,9 @@
             			title:'',
             			titleEdit:''
             		},
-                mobanArr:['http://image2.artup.com/resources/static/img/bbs_bs1.jpg','http://image2.artup.com/resources/static/img/bbs_bs2.jpg','http://image2.artup.com/resources/static/img/bbs_bs3.jpg',
-                    'http://image2.artup.com/resources/static/img/bbs_bs4.jpg','http://image2.artup.com/resources/static/img/bbs_bs5.jpg','http://image2.artup.com/resources/static/img/bbs_bs6.jpg',
-                    'http://image2.artup.com/resources/static/img/bbs_bs7.jpg','http://image2.artup.com/resources/static/img/bbs_bs8.jpg'],//模版对应的图片
+//              mobanArr:['http://image2.artup.com/resources/static/img/bbs_bs1.jpg','http://image2.artup.com/resources/static/img/bbs_bs2.jpg','http://image2.artup.com/resources/static/img/bbs_bs3.jpg',
+//                  'http://image2.artup.com/resources/static/img/bbs_bs4.jpg','http://image2.artup.com/resources/static/img/bbs_bs5.jpg','http://image2.artup.com/resources/static/img/bbs_bs6.jpg',
+//                  'http://image2.artup.com/resources/static/img/bbs_bs7.jpg','http://image2.artup.com/resources/static/img/bbs_bs8.jpg'],//模版对应的图片
                 typeHtml:[],//宝宝书html模版
                 lomok:[], //lomok卡的html模版
                 sheetVisible:false, //隐藏弹出框的值
@@ -198,7 +229,7 @@
 //                      client:"mobile",//渠道前端传递，暂时写死
                         category:this.getFromSession("category"),//产品类型这里是宝宝书
                         defDbId:this.dataImg.dataMsg.defDbId, //tplCode 模版暂时写死,父组件带入
-                        channelCode:"zc",//暂时写死
+                        channelCode:"artron",//暂时写死
                         sku:JSON.parse(sessionStorage.getItem("bbsSlsectDate")).name,
                         editPicture:[],//产品图片
                         editTxt:[],//产品文字描述
@@ -212,13 +243,16 @@
         },
         props: ['dataImg'],
         methods:{
+        		//更换板式返回
+        		blockBtn(){
+        			this.selectBS = false;
+        		},
         	    //返回上一页
 	        	linkGo(){
 	        		this.vurRouterGo();
 	        	},
             goCart(){
                 var bbsSlsectDate = JSON.parse(sessionStorage.getItem("bbsSlsectDate"));
-                console.log(bbsSlsectDate)
                 var jsons = {
                     operator:"add",
 //                  sessionId:localStorage.getItem("sessionId"),
@@ -229,14 +263,20 @@
                     price:bbsSlsectDate.price,
                     num:1,
                     discount:'',
-                    channelCode:"zc",
+                    channelCode:"artron",
                     opSystem:'',
                     thumbnailImageUrl:this.bbs.workEdit.thumbnailImageUrl,
-                    total:bbsSlsectDate.price
+                    total:bbsSlsectDate.price,
+                    sku : bbsSlsectDate.name,
+                    skuCode : bbsSlsectDate.skuCode
                 }
-                Api.car.addCar(jsons).then(res=>{
-                    //var category = "baobaoshu"
-                    location.href="#cart?edtDbId="+this.bbs.extraCode+"&category="+bbsSlsectDate.category
+                Api.car.addCar(jsons).then(res=>{ 
+                    if(res.data.code === 'success' && res.data.extraCode){
+                      location.href="#cart?edtDbId="+this.bbs.extraCode+"&category="+bbsSlsectDate.category  
+                    } else {
+                        Toast('添加购物车失败(' + res.data.message + ')');
+                    }
+                    //
                 },err=>{
                     Toast('添加购物车出错');
                 })
@@ -258,8 +298,9 @@
                 var textArrMap = [];//文字的
                 var lomArrMap = []; //lomo卡的
                 for (var i = 0; i < this.editData.ImgHashMap.keys().length; i++) {
-                    console.log((this.editData.ImgHashMap.getvalue(this.editData.ImgHashMap.keys()[i])))
+
                     if (this.editData.ImgHashMap.getvalue(this.editData.ImgHashMap.keys()[i])) {
+                    
                         arrMap.push(this.editData.ImgHashMap.getvalue(this.editData.ImgHashMap.keys()[i]));
                     }
                 }
@@ -273,23 +314,23 @@
                         textArrMap.push(this.editData.textMap.getvalue(this.editData.textMap.keys()[i]));
                     }
                 }
+                var bbsSlsectDate = JSON.parse(sessionStorage.getItem("bbsSlsectDate"));
+                this.bbs.workEdit.sku = bbsSlsectDate.name;
+                this.bbs.workEdit.skuCode = bbsSlsectDate.skuCode;
                 //字符串转换数组存储到对象里面
                 this.bbs.workEdit.editPicture = JSON.stringify(arrMap);
                 this.bbs.workEdit.editTxt = JSON.stringify(textArrMap);
                 this.bbs.workEdit.lomo = JSON.stringify(lomArrMap);
                 //存入有图的首张图片
-                for (var i = 0; i < arrMap.length; i++) {
-                		if (arrMap[i].thumbnailImageUrl) {
-                			this.bbs.workEdit.thumbnailImageUrl=arrMap[i].thumbnailImageUrl;
-                			break;
-                		}
-                }
-               console.log(this.bbs.workEdit)
+               // console.log(arrMap)
+
+				this.bbs.workEdit.thumbnailImageUrl = $(".fmPage").css("background-image").split("\"")[1];
+               	 
                 //保存函数
-                Api.work.workEdit("artup-build/builder/cors/edit/add/command.do",this.bbs.workEdit).then((res)=>{
-//				console.log(window.location.search)
-                 this.bbs.workEdit.edtDbId = res.data.extraCode
-//				console.log(this.$route.query.edtDbid)
+                Api.work.workEdit(this.bbs.workEdit).then((res)=>{
+
+                    this.bbs.workEdit.edtDbId = res.data.extraCode
+				    this.bbs.workEdit.thumbnailImageUrl = res.data.commandTitle;//缩略图地址
                     var oThis = this;
                     if (res.data.code=="success") { //保存成功
                         Indicator.close();
@@ -306,12 +347,13 @@
                                     $(el).find(".myImgBox >img").each(function(i,e){
                                         if (!$(e).attr("src")) {
                                             if ($(e).attr("class")=="lomo") {
-                                                Toast('lomo卡第'+(index-oThis.typeHtml.length+1)+'页图片上传不完整!');
+                                                Toast('请上传lomo卡第'+(index-oThis.typeHtml.length+1)+'页图片!');
                                                 isOK = false;
                                                 return;
                                             }
-                                            Toast('第'+(index+1)+'页图片上传不完整!');
+                                            Toast('请上传第'+(index+1)+'页图片!');
                                             isOK = false;
+                                            oThis.bbs.nextPageTrue = false;
                                             return;
                                         }
                                     })
@@ -330,78 +372,111 @@
                             Toast("保存成功")
                         }
                     }
-                })
-                console.log(this.bbs.nextPageTrue)
-                console.log(this.bbs.workEdit)
+                }) 
 
             },
             slectUpload(){ //素材库倒入的操作
-                this.sheetVisible = false;
-                this.popupVisible = true;
-                //计算素材库图片的位置
-                $("#bbsImg .img_div ul li").each(function(i,el){
-                    setTimeout(function(){
-                        dragThumb($(el).find("img"),$(el));
-                    },100)
+            	//规避弹窗滚动条
+            	$("body").css({
+            		"overflow":"hidden",
+            		"height": "100%"           		
+            	})
+            	Indicator.open({text: '素材加载中...',spinnerType: 'fading-circle'});
+            		var paramJson ={
+	                format:"json",
+	                userDbId:localStorage.getItem('userDbId'),
+	                status:1,
+	                pageNum:0,
+	                pageSize:50,
+	                sort:"uploadDt",
+	                order:"desc",
+	                category: ""
+	            }    			
+            //素材库地址图片
+            Api.Material.MaterialData(paramJson).then((res)=>{ 
+                this.bbs.Material = res.data.results;
+                //添加属性切换属性
+                this.bbs.Material.forEach((arrJson,i)=>{
+                    arrJson.activeLi = false;
                 })
+                if(this.bbs.Material[this.bbs.MaterialImgIndex]){
+                    this.bbs.Material[this.bbs.MaterialImgIndex].activeLi=true;    
+                }
+                 //计算素材库图片的位置
+//                setTimeout(function(){
+//	                $("#bbsImg .img_div ul li").each(function(i,el){                  
+//	                  dragThumb($(el).find("img"),$(el));                    
+//	                })  
+//              	  },300)
+               //关闭弹窗
+	           Indicator.close();
+	           this.sheetVisible = false;
+            	   this.popupVisible = true;
+            	   
+            	   	$("body").css({
+	            		"overflow":"auto",
+	            		'height': 'auto'
+	            	})
+
+            })
             },
             okQuery(){//弹出框确认选中图片操作
-
+				Indicator.open({text: '素材上传中...',spinnerType: 'fading-circle'});
                 //后台需要的请求dpi对象的参数json
                 var jsonDpi = {}
-
-                var thumbnailUrl = this.bbs.Material[this.bbs.MaterialImgIndex].thumbnailUrl;
-                //确认回显图片到页面
-//			$(".OnlyOne").attr("src",thumbnailUrl);
-                $(".OnlyOne").prev(".myImgBox").show().find("img").attr("src",thumbnailUrl).attr("attrImg",thumbnailUrl);
-                //让图片剧中裁切隐藏
-                setTimeout(function(){
-                    dragThumb($(".OnlyOne").prev(".myImgBox").find("img"),$(".OnlyOne").prev(".myImgBox"));
-                    $(".OnlyOne").remove(); //清空触发弹出上传框的节点,防止vue事件委派兼容
-                },100)
+                
                 var oData = this.bbs.Material[this.bbs.MaterialImgIndex];
-                console.log(this.bbs)
 
-                console.log(oData)
+				//存入最大宽高和里面的dpi做对比
+				this.bbs.imgEdit.minDpiHeight = oData.minDpiHeight;
+				this.bbs.imgEdit.minDpiWidth = 	oData.minDpiWidth;
+
                 jsonDpi.client = oData.client;
                 jsonDpi.channel = oData.channel;
                 jsonDpi.category = this.getFromSession("category");
-                console.log(jsonDpi.category)
+
                 jsonDpi.pictureDbId = oData.dbId;
                 jsonDpi.templateCode= this.bbs.templateCode;
                 jsonDpi.editCnfName= this.bbs.editCnfName;
                 jsonDpi.picNum = this.bbs.num;
                 jsonDpi.picPage = this.bbs.page;
                 jsonDpi.styleType = this.bbs.styleType;
+                jsonDpi.userDbId = localStorage.getItem('userDbId');
 
-                console.log(jsonDpi)
                 //素材库dpi成功
-                Api.work.checkDPI(jsonDpi).then(res=>{
+                Api.work.checkDPI(jsonDpi).then(res=>{ 
                     //res.data.thumbnailScale  缩放比
-                    var constName = this.bbs.page+'_'+this.bbs.num; //几页加第几张图
-                    var picObj = {"constName":constName,"picDbId" : oData.dbId, "page" : this.bbs.page, "editCnfIndex" : this.bbs.styleType, "num" : this.bbs.num, actions : {thumbnailScale:res.data.thumbnailScale},
-                        "thumbnailImageUrl":oData.thumbnailUrl, "previewThumbnailImageUrl" :oData.previewThumbnailImageUrl, "crop" : "false","editCnfName" : this.bbs.editCnfName};
+                    var constName = res.data.picPage+'_'+res.data.picNum; //几页加第几张图
+                    var picObj = {"constName":constName,"picDbId" : res.data.pictureDbId, "page" : res.data.picPage, "editCnfIndex" : res.data.styleType, "num" : res.data.picNum, actions : {thumbnailScale:res.data.thumbnailScale},
+                        "thumbnailImageUrl":oData.thumbnailUrl, "previewThumbnailImageUrl" :res.data.previewThumbnailImageUrl, "crop" : "false","editCnfName" : res.data.editCnfName};
 
-                    if (this.bbs.editCnfName=="baobaoshu_lomo") { //判断是lomo卡的东西
+                    if (res.data.editCnfName=="baobaoshu_lomo") { //判断是lomo卡的东西
                         this.editData.lomHashMap.putvalue(constName,picObj);//存入lomo卡的对象
                         Indicator.close();//关闭弹出框
                         this.sheetVisible = false;
                         this.popupVisible = false;
+                        $(".OnlyOne").prev(".myImgBox").show().find("img").attr("src",res.data.previewThumbnailImageUrl).attr("attrImg",res.data.thumbnailUrl);
+				   		$(".OnlyOne").remove();
                         return;
                     }
+                   $(".OnlyOne").prev(".myImgBox").show().find("img").attr("src",res.data.previewThumbnailImageUrl).attr("attrImg",res.data.thumbnailUrl);
+				   $(".OnlyOne").remove();
                     //存入图片ImgHashMap
                     this.editData.ImgHashMap.putvalue(constName,picObj);
-                    console.log(this.editData.ImgHashMap.getvalue('1_1'))
+                    //console.log(this.editData.ImgHashMap.getvalue('1_1'))
                     //隐藏两个弹窗
                     this.sheetVisible = false;
                     this.popupVisible = false;
+                    Indicator.close();
+                },err=>{
+                		 Indicator.close();
+                    Toast('网络错误!');
                 })
             },
-            editWork(){//保存作品
-                console.log(this.editData)
+            editWork(){//保存作品 
                 this.assembleData();
             },
-            goAnchor(selector) { //跳转锚点的函数
+            goAnchor(selector){ //跳转锚点的函数
                 var anchor = this.$el.querySelector(selector);
                 document.body.scrollTop = anchor.offsetTop;
             },
@@ -409,38 +484,58 @@
                 //给当前添加1个锚点id
                 $("#offsetId").attr("id","");
                 $(params.event.target).parents(".bs").parent("li").attr("id","offsetId");
+                //板式
+                var oTppe_type = $(params.event.target).parents(".bs").find(".bbsA").attr("bsdata")
+                this.bbs.oTppe_type = oTppe_type;
+               
                 var oindex = params.index;
                 this.bbs.index1 = oindex;
+                //每一次切换的时候都给板式等于1个常量100
+                this.bbs.index2 = 100
+                
                 //默认选中第一条
                 this.selectBS = true;//板式选择模版
-                console.log(params.event.target)
+				
             },
             selectMoban(params){ //选择板式
                 var oindex = params.index;
                 this.bbs.index2 = oindex;
+                
                 //变化ui
                 $(".box_checkBS .checkBS > li").removeClass("liactive");
                 $(".box_checkBS .checkBS > li").eq(oindex).addClass("liactive");
             },
             nextBS(){//板式选择完毕的下一步
+            	    //如果等于100就不去切换板式
+            		if (this.bbs.index2 ==100) {
+            			this.goAnchor("#offsetId");//跳转锚点
+            			this.selectBS = false;
+            			return 
+            		}
+            	
                 var oThis = this;
                 this.selectBS = false;
-                var oIndexs = 'bbs'+(this.bbs.index2+1)
-//              var oIndexs = 'bbs0'+(this.bbs.index2+1)
-               	//修改模版板式之后清空他map里面的数据
-                $("#fengdi").append(this.typeHtml[this.bbs.index1]);
-                //清空图片和文字
-                $("#fengdi .bbsClass").each(function(index,el){
-                		var oPageNumber = oThis.bbs.index1+1+'_'+$(el).find(".sucaiClass").attr("nm");
-                		oThis.editData.ImgHashMap.remove(oPageNumber);
-                		oThis.editData.textMap.remove("1_1");
-                })
-                $("#fengdi .allBbsClass").remove();
-                $("#fengdi .bbsClass").remove();
-                $("#fengdi .textarea").remove();
-                 //动态修改模版的板式
-                this.typeHtml[this.bbs.index1] = this.dataImg.imgArrTypeData[oIndexs];
-                this.goAnchor("#offsetId");//跳转锚点
+                var oIndexs = 'bbs'+(this.bbs.index2+1)               
+                 //动态修改模版的板式 
+               if (this.bbs.oTppe_type!=this.bbs.index2+1) {
+                 	 this.typeHtml[this.bbs.index1] = this.dataImg.imgArrTypeData[oIndexs];
+                 	 	//修改模版板式之后清空他map里面的数据
+		                $("#fengdi").append(this.typeHtml[this.bbs.index1]);
+		                //清空图片和文字
+		                $("#fengdi .bbsClass").each(function(index,el){
+		                		var oPageNumber = oThis.bbs.index1+1+'_'+$(el).find(".sucaiClass").attr("nm");
+		                		oThis.editData.ImgHashMap.remove(oPageNumber);
+		                		oThis.editData.textMap.remove("1_1");
+		                		oThis.editData.textMap.remove("1_2");
+		                })
+		                $("#fengdi .allBbsClass").remove();
+		                $("#fengdi .bbsClass").remove();
+		                $("#fengdi .textarea").remove();
+               		  this.goAnchor("#offsetId");//跳转锚点
+               }
+               else{
+                 	Toast("板式没有变更")
+                }               
             },
             MaterialCheckImg(params){//图片素材库切换
                 this.bbs.Material.forEach((arrJson,i)=>{
@@ -451,8 +546,8 @@
                 $("#bbsImg .img_div ul li").removeClass("liActive")
                 $("#bbsImg .img_div ul li").eq(params.index).addClass("liActive")
             },
-            ActionsheetIn(params){//ActionsheetIn 弹出框显示，选择图片上传
-                console.log(params.event.target)
+            ActionsheetIn(params){//ActionsheetIn 弹出框显示，选择图片上传 
+            	console.log(params.event.target)
                 //图片上传功能
                 if ($(params.event.target).hasClass("sucaiClass")) {
                     //给此节点动态给1个class,方便回显的时候调用,先清空下calss避免bug
@@ -470,7 +565,6 @@
                     //编辑时候添加1个图片回显唯一标识符
                     $(".OnlyOneEditImg").removeClass("OnlyOneEditImg");
                     $(params.event.target).addClass("OnlyOneEditImg");
-
                     var oImg = $(params.event.target).prev("img");
                     //拿到编辑的图片地址.原图缓存到页面 属性 attrImg
                     if (this.bbs.attrImg && !oImg.attr("attrImg")) {
@@ -479,20 +573,26 @@
                     }
                     //costName  map 索引
                     var costName = params.index+1+'_'+$(params.event.target).attr("nm");
+                    console.log(costName)
                     this.bbs.imgEdit.oSrc = oImg.attr("attrImg");
                     this.bbs.imgEdit.imgEditIndex = costName;
                     this.bbs.imgEdit.oW = oImg.parent(".myImgBox").width();
                     this.bbs.imgEdit.oH = oImg.parent(".myImgBox").height();
                     this.bbs.imgEdit.editCnfName = '';
-
+					console.log($(params.event.target).attr("editCnfName"))
                     if ($(params.event.target).attr("editCnfName")) {
                         this.bbs.imgEdit.editCnfName = $(params.event.target).attr("editCnfName");
                         this.bbs.imgEdit.thumbnailScale = this.editData.lomHashMap.getvalue(costName).actions.thumbnailScale
                         this.bbs.imgEdit.actions = this.editData.lomHashMap.getvalue(costName).actions
                     }else{
+                    		console.log(this.editData.ImgHashMap.getvalue(costName))
                         this.bbs.imgEdit.thumbnailScale = this.editData.ImgHashMap.getvalue(costName).actions.thumbnailScale
                         this.bbs.imgEdit.actions = this.editData.ImgHashMap.getvalue(costName).actions
                     }
+                    //传递控件里面的dpi校验参数
+                    this.bbs.imgEdit.actions.minDpiHeight = this.bbs.imgEdit.minDpiHeight
+                    this.bbs.imgEdit.actions.minDpiWidth = this.bbs.imgEdit.minDpiWidth
+
                     console.log(this.bbs.imgEdit)
                     this.editorImage(this.bbs.imgEdit)
                     //给地址存入vuex和浏览器
@@ -502,6 +602,10 @@
                 }
                 //点击弹出文本输入框
                 if ($(params.event.target).hasClass("classP")) {
+                		if (this.previewPage) {
+                			return;
+                		}
+                		
                     //重新定义文本框内容
                     this.bbs.textTextarea = $(params.event.target).text();
                     //给文本框加个唯一标识符
@@ -516,13 +620,17 @@
                 }
             },
             confirmText(){//确认按钮弹出框
-                console.log(this.bbs.textTextarea)
+            		if(regx.test(this.bbs.textTextarea)){
+            			Toast("文本框有非法字符,请修正!");
+            			return;
+            		}
                 this.textareaTexts=false;
                 $(".textErea").text(this.bbs.textTextarea)
                 //组装数据模版
                 var textMapVal = {"content":this.bbs.textTextarea,"page":this.bbs.page,"num":this.bbs.num,"editCnfIndex":this.bbs.styleType,"editCnfName" : this.bbs.editCnfName};
                 //放入文本textMap里面
-                this.editData.textMap.putvalue(this.bbs.page+"_"+this.bbs.num,textMapVal);
+                this.editData.textMap.putvalue(this.bbs.page+"_"+this.bbs.num,textMapVal);                
+				$("#bbsImg .textareaText > textarea").blur();//失去焦点
             },
             cancel(){ //弹窗取消操作
                 this.textareaTexts=false;
@@ -530,7 +638,7 @@
                 this.bbs.textTextarea = $(".textErea").text();
             },
             editorImage(jsons){
-                console.log('宽高',jsons)
+
                 this.$store.commit(
                     'showEditor',
                     {
@@ -545,11 +653,11 @@
             },
             editFinish(imgData){ //图片编辑完毕的操作
                 if (!this.bbs.imgEdit.editCnfName) { //宝宝书的对象
-                    console.log('宝宝书对象',this.bbs.imgEdit.imgEditIndex)
+
                     this.editData.ImgHashMap.getvalue(this.bbs.imgEdit.imgEditIndex).actions = imgData.postData
-                    console.log(this.editData.ImgHashMap.getvalue(this.bbs.imgEdit.imgEditIndex))
+                    //console.log(this.editData.ImgHashMap.getvalue(this.bbs.imgEdit.imgEditIndex))
                 }else{ //lomo卡的对象
-                    console.log('lomo卡的对象',this.bbs.imgEdit.imgEditIndex)
+
                     this.editData.lomHashMap.getvalue(this.bbs.imgEdit.imgEditIndex).actions = imgData.postData
                 }
                 $(".OnlyOneEditImg").siblings("img").css("width","100%").css("height","100%").css("position","inherit").css("left","0").css("top","0").attr("src",imgData.imgData)
@@ -573,17 +681,29 @@
 	 //初始化的时候默认宝宝书和lomo卡的html渲染模版,此处的数据是从父组件带带本组件中的
      this.typeHtml = this.dataImg.imgArrType;
      this.lomok = this.dataImg.imgArrLome;
-      console.log(this.typeHtml)
+
       var oThis = this;
 	  //继续编辑初始化的数据
 	  if (this.$route.query.edtDbid) {
-	  	Indicator.open({
+	  	Indicator.open({   
 		  text: '继续编辑中...',
 		  spinnerType: 'fading-circle'
 		});
 	  	this.bbs.workEdit.edtDbId = this.$route.query.edtDbid;
-	  	Api.work.unfinishedWork("artup-build/builder/cors/edit/queryOne.do",this.$route.query.edtDbid).then((res)=>{
+
+        var paramsJson={
+                        userDbId:localStorage.getItem('userDbId'),
+                        edtDbId:this.$route.query.edtDbid                         
+                    };
+	  	Api.work.unfinishedWork(paramsJson).then((res)=>{
 	  		//console.log(res)
+            
+            if(!res.data.data || !res.data.data.editPicture){
+                //关闭加载弹窗
+                Indicator.close();
+                return;
+            }            
+            
 
 			var oImgData = JSON.parse(res.data.data.editPicture);		
 			var editTxt = JSON.parse(res.data.data.editTxt);
@@ -603,32 +723,39 @@
 						var page = $(this).parents(".bstp").next(".bbsBtn").find("ul li p >span").text();				 
 						$(this).attr("id",page+'_'+$(el).attr("nm")+'_'+$(this).attr("editcnfname"))
 					})
+					$(".listBox ul li .bs .bstp .imgBox .textarea .classP").each(function(i,el){
+						var page = $(this).parents(".bstp").next(".bbsBtn").find("ul li p >span").text();				 
+						$(this).attr("id",page+'_'+$(el).attr("nm")+'_'+$(this).attr("editcnfname")+'_'+page)
+					})
 				},500)
-				 //动态添加图片
+				 //动态添加图片和文字
 				setTimeout(function(){	
 					if (editTxt.length>0) {
 						for (var i = 0; i < editTxt.length; i++) {
-		               		console.log(editTxt[i])
+
 		               		var constName = editTxt[i].page+'_'+editTxt[i].num;	               		
 							//map生成变量
 							 var textMapVal = {"content":editTxt[i].content,"page":editTxt[i].page,"num":editTxt[i].num,"editCnfIndex":editTxt[i].editCnfIndex,"editCnfName" : editTxt[i].editCnfName};						
-							 console.log(textMapVal)
+
 							 oThis.editData.textMap.putvalue(constName,textMapVal);							 
 							var pageNum = editTxt[i].page+'_'+editTxt[i].num+'_'+editTxt[i].editCnfName;
-							$("#"+pageNum).parents(".bsLeft").find(".textarea  >p").text(editTxt[i].content);
 
+							if (editTxt[i].editCnfName=="huace_170-235_24_single") {
+								$("#"+pageNum+'_'+editTxt[i].page).text(editTxt[i].content)
+							}else{
+								$("#"+pageNum).parents(".bsLeft").find(".textarea  >p").text(editTxt[i].content);						
+							}
 		               }
 					}
 					if (oImgData.length>0) {
 						for (var i = 0; i < oImgData.length; i++) {
-							console.log(oImgData[i])
+						
 							var constName = oImgData[i].page+'_'+oImgData[i].num;
 							//map生成变量
-							var picObj = {"constName":constName,"picDbId" : oImgData[i].picDbId, "page" : oImgData[i].page, "editCnfIndex" : oImgData[i].editCnfIndex, "num" : oImgData[i].num, "actions" : {},
+							var picObj = {"constName":constName,"picDbId" : oImgData[i].picDbId, "page" : oImgData[i].page, "editCnfIndex" : oImgData[i].editCnfIndex, "num" : oImgData[i].num, "actions" :oImgData[i].actions,
 							"thumbnailImageUrl":oImgData[i].thumbnailImageUrl, "previewThumbnailImageUrl" :oImgData[i].previewThumbnailImageUrl, "crop" : oImgData[i].crop,"editCnfName" : oImgData[i].editCnfName};
 							oThis.editData.ImgHashMap.putvalue(constName,picObj);
 							var pageNum = oImgData[i].page+'_'+oImgData[i].num+'_'+oImgData[i].editCnfName;
-							console.log(pageNum)
 							$("#"+pageNum).prev(".myImgBox").show().find("img").css("width","100%").css("height","100%").attr("src",oImgData[i].previewThumbnailImageUrl).attr("attrImg",oImgData[i].thumbnailImageUrl);
 							$("#"+pageNum).remove();						
 	             	 }
@@ -637,11 +764,11 @@
 						for (var i = 0; i < oImgLomo.length; i++) {
 							var constName = oImgLomo[i].page+'_'+oImgLomo[i].num;
 							//map生成变量
-							var picObj = {"constName":constName,"picDbId" : oImgLomo[i].picDbId, "page" : oImgLomo[i].page, "editCnfIndex" : oImgLomo[i].editCnfIndex, "num" : oImgLomo[i].num, "actions" : {"thumbnailScale":oImgData[i].actions.thumbnailScale},
+							var picObj = {"constName":constName,"picDbId" : oImgLomo[i].picDbId, "page" : oImgLomo[i].page, "editCnfIndex" : oImgLomo[i].editCnfIndex, "num" : oImgLomo[i].num, "actions" : oImgLomo[i].actions,
 							"thumbnailImageUrl":oImgLomo[i].thumbnailImageUrl, "previewThumbnailImageUrl" :oImgLomo[i].previewThumbnailImageUrl, "crop" : oImgLomo[i].crop,"editCnfName" : oImgLomo[i].editCnfName};
 							oThis.editData.lomHashMap.putvalue(constName,picObj);
-							var pageNum = oImgLomo[i].page+'_'+oImgLomo[i].num+'_'+oImgLomo[i].editCnfName;
-							$("#"+pageNum).prev(".myImgBox").show().find("img").css("width","100%").css("height","100%").attr("src",oImgData[i].previewThumbnailImageUrl).attr("attrImg",oImgData[i].thumbnailImageUrl);				
+							var pageNum = oImgLomo[i].page+'_'+oImgLomo[i].num+'_'+oImgLomo[i].editCnfName;							
+							$("#"+pageNum).prev(".myImgBox").show().find("img").css("width","100%").css("height","100%").attr("src",oImgLomo[i].previewThumbnailImageUrl).attr("attrImg",oImgLomo[i].thumbnailImageUrl);				
 		               		$("#"+pageNum).remove();
 						}
 					}
@@ -649,33 +776,18 @@
 					Indicator.close();
 				},1000)
                 })
-            }
-            //素材库地址图片
-            Api.Material.MaterialData("artup-build/service/picture/page.do","").then((res)=>{
-            		console.log(res)
-                this.bbs.Material = res.data.results;
-                //添加属性切换属性
-                this.bbs.Material.forEach((arrJson,i)=>{
-                    arrJson.activeLi = false;
-                })
-                if(this.bbs.Material[this.bbs.MaterialImgIndex]){
-                    this.bbs.Material[this.bbs.MaterialImgIndex].activeLi=true;    
-                }
-                
-            })
+            } 
+             
             //拿到浏览器存储的书皮
             var shupi = JSON.parse(sessionStorage.getItem("bbsSlsectDate")).colorName;
             //动态切换书皮
             checkColor(shupi,$('.fmPage'),$('.fdPage'),$('.fePage'))
-            console.log(this.bbs)
+
             var templateCode =this.bbs.workEdit.tplCode;//模版编码
-            console.log(templateCode)
-            var client = 'pc';   //手机，pc，app 设备等
-            var channel = '本站' //渠道
 
-            //图片操作的json值
-//          var cropitData = {"x":200.21,"y":400.32,"width":100,"height":300,"rotate":0,"thumbnailScale":1};
-
+            var client = 'wx';   //手机，pc，app 设备等
+            var channel = 'artron' //渠道
+ 
             //定义3个hashMap
             this.editData.ImgHashMap = new HashMap(); //图片
             this.editData.lomHashMap =  new HashMap();//lom卡
@@ -684,27 +796,32 @@
 
             //图片上传时提交的参数
             var extraPostData = {};
-            console.log(document.getElementById('browseButton'));
-           
-//          console.log(typeHtmlLome)
+ 
+            var uploadUrl = Api.UPLOAD_URL+'&category='+this.getFromSession3("category")+'&userDbId='+localStorage.getItem('userDbId');
 
-			/* 文件上传init */
-//          var uploadUrl = 'http://image2.artup.com/artup-build/builder/cors/picture/upload.do?format=json&sessionId=2141731&category=baobaoshu';
-//          var uploadUrl = Api.UPLOAD_URL;
-            var uploadUrl = Api.UPLOAD_URL+'&category='+this.getFromSession("category");
-            console.log(uploadUrl)
             
             uploadInitializer($, uploadUrl, onUploadComplete);
             // //文件上传事件
             function onUploadComplete($, r){
                 var browBtn = document.getElementById('browseButton');
                 r.assignBrowse(browBtn, false);
+               
                 r.on('filesAdded', function(array) {
-                    if(array.length > 1){alert('只能上传一张图片');return;}
+                    if(array.length > 1){ 
+                        $.each(array, function(idx, file) { 
+                            file.chunks = [];
+                        });
+
+                        alert('只能上传一张图片');
+                        return;
+                    } 
                     var ok = validateUploadFiles($, array);
                     if (ok) {
                         //触发uploadStart
-                        r.upload();} else {r.cancel();}
+                        r.upload();
+                    } else {
+                        r.cancel();
+                    }
                 });
                 
                 //开始上传
@@ -713,7 +830,7 @@
                     extraPostData  = {"templateCode" : templateCode, "client" : client, "channel" : channel,"picPage":oThis.bbs.page,"picNum":oThis.bbs.num,"styleType":oThis.bbs.styleType,"editCnfName":oThis.bbs.editCnfName}
                     r.opts.query = extraPostData;
                     //打开进度框
-                    Indicator.open({text: '图片上传中...',spinnerType: 'fading-circle'});
+                    $("#loading_file").show();
                     //关闭上弹块儿
                     oThis.sheetVisible = false;
                 });
@@ -722,39 +839,55 @@
                     var progress = Number(r.progress());
                     var progressWidth = progress.toFixed(2)*100;
                     //进度条显示
-                    $(".mint-indicator-text").text("上传中..."+parseInt(progressWidth)+'%')
+                    if(progressWidth > 0) {						
+						$("#loading_file .loading_div >span").text("上传中..."+parseInt(progressWidth)+'%');
+					}
+//                  $(".mint-indicator-text").text("上传中..."+parseInt(progressWidth)+'%')
+                });
+                r.on('error',function(){
+                		$("#loading_file").hide();
+                		 Indicator.close();//关闭弹出框
+                		 Toast('网络错误，上传失败')
                 });
                 //上传成功
                 r.on('fileSuccess', function(file, message){
-                    var responseText = $.parseJSON(message);
-                    $(".OnlyOne").prev(".myImgBox").show().find("img").attr("src",responseText.thumbnailUrl).attr("attrImg",responseText.thumbnailUrl);
-                    //让图片剧中裁切隐藏
-                    setTimeout(function(){
-                        dragThumb($(".OnlyOne").prev(".myImgBox").find("img"),$(".OnlyOne").prev(".myImgBox"));
-                        $(".OnlyOne").remove(); //清空触发弹出上传框的节点,防止vue事件委派兼容
-                    },200)
+                    var responseText = $.parseJSON(message); 
+                    if(responseText.pictureDbId){ 
+                        $(".OnlyOne").prev(".myImgBox").show().find("img").attr("src",responseText.previewThumbnailImageUrl).attr("attrImg",responseText.thumbnailUrl);
+                        //让图片剧中裁切隐藏
+                        setTimeout(function(){
+                            $(".OnlyOne").remove(); //清空触发弹出上传框的节点,防止vue事件委派兼容
+                        },200)
+                        //存入最大宽高和里面的dpi做对比
+                        oThis.bbs.imgEdit.minDpiHeight = responseText.minDpiHeight;
+                        oThis.bbs.imgEdit.minDpiWidth =     responseText.minDpiWidth;
+                        //组装后端需要的数据
+                        var constName = responseText.picPage+'_'+responseText.picNum; //几页加第几张图
+                        if (constName=="1_1"){//如果有第一页存入预览图
+                            oThis.bbs.workEdit.thumbnailImageUrl=responseText.thumbnailUrl;
+                        }
+                        var picObj = {"constName":constName,"picDbId" : responseText.pictureDbId, "page" : responseText.picPage, "editCnfIndex" : responseText.styleType, "num" : responseText.picNum, "actions" : {thumbnailScale:responseText.thumbnailScale},
+                            "thumbnailImageUrl":responseText.thumbnailUrl, "previewThumbnailImageUrl" :responseText.previewThumbnailImageUrl, "crop" : "false","editCnfName" : responseText.editCnfName};
 
 
-                    //组装后端需要的数据
-                    var constName = responseText.picPage+'_'+responseText.picNum; //几页加第几张图
-                    if (constName=="1_1"){//如果有第一页存入预览图
-                        oThis.bbs.workEdit.thumbnailImageUrl=responseText.thumbnailUrl;
+
+                        //根据后端返回的类型组装数据,判断结尾标识符是不是lomo卡
+                        if (responseText.editCnfName=="baobaoshu_lomo") { //上传的是宝宝书的东西
+                            oThis.editData.lomHashMap.putvalue(constName,picObj);//存入lomo卡的对象
+							
+                            Indicator.close();//关闭弹出框
+                            return;
+                        }
+                        //存入图片ImgHashMap
+                        oThis.editData.ImgHashMap.putvalue(constName,picObj);
+
+                    } else {
+                    		$("#loading_file").hide();
+                        Toast('上传图片失败，请重试');
                     }
-                    var picObj = {"constName":constName,"picDbId" : responseText.pictureDbId, "page" : responseText.picPage, "editCnfIndex" : responseText.styleType, "num" : responseText.picNum, "actions" : {thumbnailScale:responseText.thumbnailScale},
-                        "thumbnailImageUrl":responseText.thumbnailUrl, "previewThumbnailImageUrl" :responseText.previewThumbnailImageUrl, "crop" : "false","editCnfName" : responseText.editCnfName};
-
-                    console.log(responseText)
-                    console.log(picObj)
-                    //根据后端返回的类型组装数据,判断结尾标识符是不是lomo卡
-                    if (responseText.editCnfName=="baobaoshu_lomo") { //上传的是宝宝书的东西
-                        oThis.editData.lomHashMap.putvalue(constName,picObj);//存入lomo卡的对象
-                        console.log(oThis.editData.lomHashMap.getvalue("1_1"))
-                        Indicator.close();//关闭弹出框
-                        return;
-                    }
-                    //存入图片ImgHashMap
-                    oThis.editData.ImgHashMap.putvalue(constName,picObj)
+                    
                     //关闭弹出框
+                    $("#loading_file").hide();
                     Indicator.close();
                 });
             }

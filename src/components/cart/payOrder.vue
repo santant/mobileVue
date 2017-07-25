@@ -2,8 +2,8 @@
 	<div id="payOrder">
 		<!--头-->
 		<mt-header title="确认订单">
-		  <router-link to="/" slot="left">
-		    <mt-button icon="back"></mt-button>
+		  <router-link to="" v-tap="{methods:linkGo}" slot="left">
+		    <mt-button icon="back">返回</mt-button>
 		  </router-link>
 		  <mt-button icon=""  slot="right"></mt-button>
 		</mt-header>
@@ -12,7 +12,7 @@
 		</div>
 		<div class="addressContet" v-bind:hidden="!addresBool" v-tap="{methods:updataAddress}">
 			<ul>
-				<li><span>收件人姓名</span><span>{{addressData.name}}({{addressData.mobile}})</span></li>
+				<li><span>收件人姓名</span><span>{{addressData.name | subStr}}({{addressData.mobile}})</span></li>
 				<li>{{addressData.province}}{{addressData.address | splitAddress}}</li>
 				<i class="icon iconfont">&#xe65f;</i>
 			</ul>
@@ -20,7 +20,7 @@
 		<div class="content">
 			<div class="contentList clearfix">
 				<ul class="clearfix">
-					<li class="clearfix" v-for="(itmes,index) in dataList.cars">
+					<li class="clearfix" v-for="(itmes,index) in dataList">
 						<div class="leftBox clearfix">
 							<img :src="itmes.thumbnailImageUrl"/>
 						</div>
@@ -42,7 +42,7 @@
 						</li>
 						<li>
 							<span>商品金额</span>
-							<span>￥{{dataList.total}}</span>
+							<span>￥{{total}}</span>
 						</li>
 						<li>
 							<span>运费</span>
@@ -56,10 +56,11 @@
 				</div>
 			</div>
 		</div>
+		<i style="height: 2.93rem;display: block;width: 100%;"></i>
 		<div class="bottomBar">
 			<ul>
-				<li>合计<span>￥{{dataList.total}}</span></li>
-				<li><span v-tap="{methods:gotoOrderPay}">订单提交</span></li>
+				<li>合计<span>￥{{total |toFixedTwo}}</span></li>
+				<li><span v-tap="{methods:gotoOrderPay}">确认订单</span></li>
 			</ul>
 		</div>
 	</div>
@@ -73,38 +74,65 @@
             return {
               dataList:[],
               addressData:[],
-              addresBool :false
+              addresBool :false,
+              car:'',
+              total:0
             }
         },
         methods: {
         	
         	gotoOrderPay(){
-                var payUrl = "#orderStatus?paymentType=WX&addressId="+this.addressData.dbId+"&dbId="+this.dataList.dbId+"&userDbId="+this.$route.query.userDbId+"&openId="+this.$route.query.openId;
-        		//console.log(payUrl);
-                location.href=	payUrl;
+        		if(this.addresBool != true){
+        			Toast('地址不能为空');
+        			return;
+        		}
+			var jsons = {
+				userDbId:localStorage.getItem("userDbId"),
+				cars:this.car
+			}
+			Api.car.createOrder(jsons).then(res=>{ 
+				if(res.data.code == 'success'){
+                    var orderDbId = res.data.orderDbId;
+                    var openId = res.data.openId;
+                    var userDbId = localStorage.getItem("userDbId");
+					//alert(res.data.orderDbId)
+					 var payUrl = "#orderStatus?paymentType=WX&addressId="+this.addressData.dbId+"&dbId="+orderDbId+"&userDbId="+userDbId+"&openId="+openId; 
+          			 location.href = payUrl;
+
+				}
+			},err=>{
+				Toast('请求错误');
+			})
+        		
+          
         	},
         	updataAddress(){
-        		location.href="#Address?openId="+this.$route.query.openId+"&orderDbId="+this.$route.query.orderDbId+"&userDbId="+localStorage.getItem("sessionId");
+        		
+        		location.href="#Address?openId="+this.$route.query.openId+"&orderDbId="+this.$route.query.orderDbId+"&userDbId="+localStorage.getItem("userDbId");
         	},
         	addAddress(){
-        		location.href="#newAddress?openId="+this.$route.query.openId+"&orderDbId="+this.$route.query.orderDbId+"&userDbId="+localStorage.getItem("sessionId");
-        	}
-         
+        		location.href="#Address?openId="+this.$route.query.openId+"&orderDbId="+this.$route.query.orderDbId+"&userDbId="+localStorage.getItem("userDbId");
+        	},
+        linkGo(){
+			this.vurRouterGo();
+		}
         },
         mounted() {
+        	 this.car = sessionStorage.getItem('cars'); 
         	var jsons = {
-        		orderDbId:this.$route.query.orderDbId,
-        		openId:this.$route.query.openId,
-        		userDbId:this.$route.query.userDbId,
-        		sessionId:this.getFromSession("sessionId")
-        	} 
-           Api.car.queryOrder(jsons).then(res=>{ 
+        		dbId:this.car
+        	}
+        	 Api.car.queryCar(jsons).then(res=>{ 
            	if(res.data.length > 0){
-           		this.dataList = res.data[0];
+           		this.dataList = res.data;
+           		for(var i = 0; i<this.dataList.length; i++){
+           			this.total += Number(this.dataList[i].total)
+           		} 
            	} 
            },err=>{
            		Toast('数据请求错误');
            })
+
            var addJsons= {
            		userDbId:this.$route.query.userDbId,
            		sessionId:this.getFromSession("sessionId")

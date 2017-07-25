@@ -2,8 +2,8 @@
 	<div id="Address">
 		<!--头-->
 		<mt-header title="收货地址">
-		  <router-link to="/" slot="left">
-		    <mt-button icon="back"></mt-button>
+		  <router-link to="" v-tap="{methods:linkGo}" slot="left">
+		    <mt-button icon="back">返回</mt-button>
 		  </router-link>
 		  <mt-button icon=""  slot="right"></mt-button>
 		</mt-header>
@@ -13,7 +13,8 @@
 					<div class="content clearfix" :dbId='itme.dbId'>
 						<div class="listContent clearfix">
 							<ul class="clearfix">
-								<li><p v-tap='{methods:updataCheck,dbid:itme.dbId}' class= "circle circleNone"><i class="icon iconfont">&#xe639;</i></p></li>
+								<li  v-tap='{methods:updataCheck,dbid:itme.dbId,index:indexs}'><p v-if="selectBtn" :class="itme.isOK ? 'circle':'circle circleNone' "><i v-bind:hidden="itme.isOK == false" class="icon iconfont">&#xe639;</i></p></li>
+
 								<li>
 									<p>
 										<span>{{itme.name}}</span>
@@ -44,41 +45,30 @@
 		data(){
 			return{
 				tapStyle:false,
-				dataList:[]
+				dataList:[],
+				selectBtn:false
 			}
 		},
 		methods:{
 			updataCheck(params){
-				if($(params.event.target).hasClass("circleNone")){
-					$(params.event.target).removeClass('circleNone');
-					$(params.event.target).find('i').show();
-					var jsons = {
-							sessionId:this.getFromSession("sessionId"),
+				this.dataList[params.index].isOK = !this.dataList[params.index].isOK;
+				var jsons = {
+							userDbId:localStorage.getItem("userDbId"),
 							dbId:params.dbid
-						}
-					Api.address.setDefaultAddress(jsons).then(res=>{
-						location.href="#payOrder?openId="+this.$route.query.openId+"&orderDbId="+this.$route.query.orderDbId+"&userDbId="+localStorage.getItem("userDbId")
-					},err=>{
-						Toast('数据请求错误');
-					})
-				}else{
-					if($(params.event.target).hasClass("icon")){
-						$(params.event.target).hide();
-						$(params.event.target).parent('p').addClass('circleNone');
-					}
-					
-				}
+							}
+				Api.address.setDefaultAddress(jsons).then(res=>{
+					location.href="#payOrder?openId="+this.$route.query.openId+"&orderDbId="+this.$route.query.orderDbId+"&userDbId="+localStorage.getItem("userDbId")
+				},err=>{
+					Toast('数据请求错误');
+				})
 			},
 			/*删除地址*/
 			deleteAddress(params){
 				var jsons = {
-					sessionId:this.getFromSession("sessionId"),
+					userDbId: localStorage.getItem("userDbId"),
 					dbId:params.dbId
 				};
-				var index = params.index;
-				//console.log(jsons)
-				console.log(params)
-				 // this.dataList.splice(index,1);
+				var index = params.index; 
 				 var that = this;
 				
 				 Api.address.deleteAddress(jsons).then(res=>{
@@ -95,15 +85,39 @@
 			},
 			/*新增地址*/
 			gotoAddAddress(){
-				location.href="#newAddress?openId="+this.$route.query.openId+"&orderDbId="+this.$route.query.orderDbId+"&userDbId="+localStorage.getItem("userDbId");
+				if(this.$route.query.dzgl && this.$route.query.dzgl == 'grzx'){
+					
+					location.href="#newAddress?dzgl=grzx";
+				}else{
+					
+					location.href="#newAddress?openId="+this.$route.query.openId+"&orderDbId="+this.$route.query.orderDbId+"&userDbId="+localStorage.getItem("userDbId");
+				}
+
 			},
 			/*编辑地址*/
 			editorAddress(params){
-				location.href="#newAddress?dbId="+params.dbId+"&openId="+this.$route.query.openId+"&orderDbId="+this.$route.query.orderDbId+"&userDbId="+localStorage.getItem("userDbId");
+				if(this.$route.query.dzgl && this.$route.query.dzgl == 'grzx'){
+					location.href="#newAddress?dzgl=grzx&dbId="+params.dbId;
+					
+				}else{
+					location.href="#newAddress?dbId="+params.dbId+"&openId="+this.$route.query.openId+"&orderDbId="+this.$route.query.orderDbId+"&userDbId="+localStorage.getItem("userDbId");
+					
+				}
+
+			},
+	        linkGo(){
+				this.vurRouterGo();
 			}
-		
 		},
 		mounted(){
+			if(this.$route.query.dzgl && this.$route.query.dzgl == 'grzx'){
+				this.selectBtn = false;
+				 
+			}else{	
+			
+				this.selectBtn = true;
+				
+			}
 			var jsons = {
 				userDbId:localStorage.getItem("userDbId"),
 				status:1,
@@ -114,7 +128,17 @@
 			}
 			Api.address.addressList(jsons).then(res=>{
 				this.dataList = res.data.results;
-				console.log(res)
+				console.log(this.dataList)
+				for (var i = 0; i < this.dataList.length; i++) {
+					if(this.dataList[i].mainAddr  == '是'){
+						
+						this.dataList[i].isOK = true;
+					}else{
+						this.dataList[i].isOK = false;	
+					}
+				}
+				//console.log(this.dataList)
+				//console.log(res)
 				//动态设置删除按钮高度
 				function FnsetDelectDivHeight(){
 					var delectHeight = [];

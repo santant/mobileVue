@@ -15,14 +15,34 @@ var urlQuery = sessionStorage.getItem('urlQuery');
 const VueHttp = new Vue();
 //用户名全局变量获取
 //localStorage.setItem("sessionId","2141731");
-var  userDbIds = localStorage.getItem('userDbId');	
-var  sessionIds = "";
+//var  userDbIds = localStorage.getItem('userDbId');	
+//var  sessionIds = "";
 
-const  UPLOAD_URL = `${STATIC_SERVER_HOST}artup-build/builder/cors/picture/upload.do?format=json&userDbId=${userDbIds}`;
+/*图片上传地址*/
+const  UPLOAD_URL = `${STATIC_SERVER_HOST}artup-build/builder/cors/picture/upload.do?format=json`;
+/*查询素材库*/
+const  QUERY_PICTURE_URL = `${HOST}artup-build/service/picture/page.do?format=json&ignore=true`;
+/*未完成作品*/
+const  QUERY_UNFINISHED_WORK_URL = `${HOST}artup-build/builder/cors/edit/queryOne.do?format=json&ignore=true`;
+/*保存作品*/
+const  SAVE_WORK_URL = `${HOST}artup-build/builder/cors/edit/add/command.do?format=json&ignore=true`;
+/*作品列表*/
+const  QUERY_WORK_LIST_URL = `${HOST}artup-build/builder/cors/edit/queryByPage.do?format=json&ignore=true`;
+/*查询sku*/
+const  QUERY_SKU_URL = `${HOST}artup-build/builder/sku.do?format=json&ignore=true`;
+/*查询属性对象*/
+const  QUERY_ATTRIBUTE_URL = `${HOST}artup-build/builder/service/attributes.do?format=json&ignore=true`;
+
 /*添加购物车*/
 const ADD_CAR = `${HOST}artup-build/builder/cors/car/add/command.do?format=json&ignore=true`
 /*购物车列表*/
 const CAR_LIST = `${HOST}artup-build/builder/cors/car/queryByPage.do?format=json&ignore=true`
+
+/*提交购物车*/
+const SUBMIT_CARS = `${HOST}artup-build/builder/cors/car/submitCars.do?format=json&ignore=true`
+//购物车物品查询
+const QUERY_CAR = `${HOST}artup-build/builder/cors/car/queryAll.do?format=json&ignore=true`
+
 
 /*收货地址*/
 const ADDRESS = `${HOST}artup-build/builder/address/queryByPage.do?format=json&ignore=true`
@@ -47,7 +67,7 @@ const DELETE_ORDER = `${HOST}artup-build/builder/order/update/command.do?format=
 const DEFAULT_ADDRESS = `${HOST}artup-build/builder/address/queryAll.do?format=json&ignore=true&status=1&mainAddr=Y`
 
 /*素材dpi是否合格*/
-const MATER_DPI = `${STATIC_SERVER_HOST}artup-build/builder/cors/picture/validate.do?format=json&ignore=true&userDbId=${userDbIds}`
+const MATER_DPI = `${STATIC_SERVER_HOST}artup-build/builder/cors/picture/validate.do?format=json&ignore=true`
 
 /*订单支付*/
 const ORDER_PAY = `${HOST}artup-build/builder/orderPayment/payment.do?format=json&ignore=true`
@@ -68,9 +88,14 @@ const SET_DEFAULT_ADDRESS = `${HOST}/artup-build/builder/address/mainAddress.do?
 /*重新登录函数*/
 const GER_USERDBID = `${HOST}artup-build/builder/service/tokenUrl.do?format=json`
 
+const RELOAD_CACHE = `${HOST}artup-build/builder/service/getFromCache.do?ignore=true&format=json`
 
 /*首页连接*/
 const INDEX_IMG = `${HOST}artup-build/builder/cors/lunbo/list.do?ignore=true&format=json&client=mobile`
+//删除购物车记录
+const DELECT_CAR_RECORD = `${HOST}artup-build/builder/cors/car/delete/command.do?format=json&ignore=true`
+//删除作品
+const DELECT_WORK = 	`${HOST}artup-build/builder/cors/edit/delete/command.do?format=json&ignore=true`
 
 
 ////只要访问ajax的时候，没有这个用户信息，就跳到首页去登录获取用户信息
@@ -83,12 +108,26 @@ export default {
 	  			return  VueHttp.$http.get(HOST+inter)   
 	  		}
 	   },
+	   sku:{
+	   		querySku:(paraJsons)=>{
+	   			return VueHttp.$http.get(QUERY_SKU_URL,{params: paraJsons})
+	   		},
+	   		queryAttributes:(paraJsons)=>{
+	   			return VueHttp.$http.get(QUERY_ATTRIBUTE_URL, {params: paraJsons})
+	   		}
+	   },
 	   car:{//购物车
+	   	deleteCarCorde:(jsons)=>{
+	   		return VueHttp.$http.get(DELECT_CAR_RECORD,{params:jsons})
+	   	},
 	   	/*添加购物车*/
 	   	addCar:(jsons)=>{
 	   		return VueHttp.$http.post(ADD_CAR,
 	   	 			qs.stringify(jsons)   	 				   	 		
 	   	 	)
+	   	},
+	   	queryCar:(jsons)=>{
+	   		return VueHttp.$http.get(QUERY_CAR,{params:jsons})
 	   	},
 	   	orderPay:(jsons)=>{
 	   		return VueHttp.$http.post(ORDER_PAY,
@@ -97,6 +136,9 @@ export default {
 	   	},
 	   	carList:(jsons)=>{//购物车列表
 	   		return VueHttp.$http.get(CAR_LIST,{params:jsons})
+	   	},
+	   	submitCars:(jsons)=>{ 
+	   		return VueHttp.$http.post(SUBMIT_CARS, qs.stringify(jsons))
 	   	},
 	   	createOrder:(jsons)=>{//创建订单
 	   		return VueHttp.$http.post(CREATE_ORDER,
@@ -162,47 +204,47 @@ export default {
 	   	 	return VueHttp.$http.get(SET_DEFAULT_ADDRESS,{params:jsons})
 	   	 }
 	   },
-	   baobaoshu:{ //宝宝书
-	   	//artup-build/builder/service/baobaoshu/attributes.do?format=json&ignore=true
-	   	  bbsSelect:(inter)=>{ //宝宝书选择数据
-	   	  	return  VueHttp.$http.get(HOST+inter)   
-	   	  },
-	   	  bbsPrice:(inter,category,color,page,size)=>{//宝宝书价格
-	   	  	return  VueHttp.$http.get(HOST+inter)
-	   	  }
-	   },
+	   // baobaoshu:{ //宝宝书
+	   // 	//artup-build/builder/service/baobaoshu/attributes.do?format=json&ignore=true
+	   // 	  bbsSelect:(inter)=>{ //宝宝书选择数据
+	   // 	  	return  VueHttp.$http.get(HOST+inter)   
+	   // 	  },
+	   // 	  bbsPrice:(inter,category,color,page,size)=>{//宝宝书价格
+	   // 	  	return  VueHttp.$http.get(HOST+inter)
+	   // 	  }
+	   // },
 	   work:{ //作品的接口post方法(保存)
-	   	 	workEdit:(inter,jsons)=>{	
+	   	 	workEdit:(jsons)=>{	
 				jsons = VueHttp.sourceSession(jsons)
-	   	 		return VueHttp.$http.post(HOST+inter,
+	   	 		return VueHttp.$http.post(SAVE_WORK_URL,
 	   	 			qs.stringify(jsons)   	 				   	 		
 	   	 		)
 	   	 	},
-	   	 	workList:(inter,status,pageNum,category)=>{ //作品列表查询
-	   	  		return  VueHttp.$http.get(HOST+inter,{
-						params: {
-				   	  		format:"json",
-				   	  		ignore:"true",
-				   	  		userDbId:userDbIds,
-				   	  		sessionId:sessionIds,
-				   	  		status:status, //未完成1，已经完成2 
-				   	  		sortField:"createdDt",
-				   	  		pageSize:15,//每页多少条
-				   	  		pageNum:pageNum, //第几页
-				   	  		order:"desc",
-				   	  		category:category //类型
-				   	  	}
+	   	 	deletWork:(jsons)=>{
+	   	 		return  VueHttp.$http.get(DELECT_WORK,{params: jsons})
+	   	 	},
+	   	 	workList:(paraJson)=>{ //作品列表查询
+	  //  	  		return  VueHttp.$http.get(QUERY_WORK_LIST_URL,{
+			// 			params: {
+			// 	   	  		format:"json",
+			// 	   	  		ignore:"true",
+			// 	   	  		userDbId:userDbIds,
+			// 	   	  		sessionId:sessionIds,
+			// 	   	  		status:status, //未完成1，已经完成2 
+			// 	   	  		sortField:"createdDt",
+			// 	   	  		pageSize:15,//每页多少条
+			// 	   	  		pageNum:pageNum, //第几页
+			// 	   	  		order:"desc",
+			// 	   	  		category:category //类型
+			// 	   	  	}
+			// })
+			return  VueHttp.$http.get(QUERY_WORK_LIST_URL,{
+						params: paraJson
 			})
 	   	  },
-	   	  unfinishedWork:(inter,edtDbId)=>{//素材数据
-		   	  	return VueHttp.$http.get(HOST+inter, {
-	   	 			params: {
-			   	  		format:"json",
-			   	  		ignore:"true",
-			   	  		userDbId:userDbIds,
-			   	  		sessionId:sessionIds,
-			   	  		edtDbId:edtDbId				   	  		
-				   	}
+	   	  unfinishedWork:(paramJson)=>{//素材数据
+		   	  	return VueHttp.$http.get(QUERY_UNFINISHED_WORK_URL, {
+	   	 			params: paramJson 	
 				})
 	   	 },
 	   	 checkDPI:(jsons)=>{
@@ -214,6 +256,9 @@ export default {
 	   Index:{ //首页和其他介绍页面需要的接口
 	   	  indexImg:()=>{ 
 	   	  	return  VueHttp.$http.get(INDEX_IMG)   
+	   	  },
+	   	  reloadCache:()=>{ 
+	   	  	return  VueHttp.$http.get(RELOAD_CACHE);   
 	   	  }
 	   },
 	   user:{
@@ -222,20 +267,27 @@ export default {
 	   	}
 	   },
 	   Material:{
-	   		MaterialData:(inter,category)=>{//素材数据
-		   	  	return VueHttp.$http.get(HOST+inter, {
-						params: {
-				   	  		format:"json",
-				   	  		userDbId:userDbIds,
-				   	  		status:1,
-				   	  		pageNum:0,
-				   	  		pageSize:50,
-				   	  		sort:"uploadDt",
-				   	  		order:"desc",
-				   	  		category:category
+	   // 		MaterialData:(inter,category)=>{//素材数据
+		  //  	  	return VueHttp.$http.get(HOST+inter, {
+				// 		params: {
+				//    	  		format:"json",
+				//    	  		userDbId:userDbIds,
+				//    	  		status:1,
+				//    	  		pageNum:0,
+				//    	  		pageSize:50,
+				//    	  		sort:"uploadDt",
+				//    	  		order:"desc",
+				//    	  		category:category
+				//    	  	}
+				// })
+	   // 	 }
+	   		MaterialData:(paramJson)=>{//素材数据
+		   	  	return VueHttp.$http.get(QUERY_PICTURE_URL, 
+						 {
+				   	  		params: paramJson
 				   	  	}
-				})
-	   	 }	   	 
+				)
+	   	 	}	   	 
 	   },
 	   UPLOAD_URL:UPLOAD_URL,
 	   

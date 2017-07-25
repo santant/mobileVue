@@ -1,5 +1,10 @@
 <template>
     <div id="editImg" v-once>
+    		<!--dpi校验-->
+    		<div  class="reportNav">		
+				！图片像素不足，会导致打印模糊，建议更换图片
+		</div>
+
         <div id="dropBox" class="resumable-drop">
         </div>
         <div id="image-cropper">
@@ -19,7 +24,7 @@
 
 <script>
     import {mapState, mapMutations} from 'vuex';
-    import getCropitData from '../../../service/getCropitData.js';
+    import getCropitData from '../../service/getCropitData.js';
     import { Indicator } from 'mint-ui';
 
     let imageCropper,
@@ -33,8 +38,7 @@
     export default {
         data() {
             return {
-                NavMenu: [], //左侧的菜单栏
-                number2: '',//test
+             
             }
         },
         methods: {
@@ -43,9 +47,9 @@
 
                 let image = document.querySelector(".cropit-preview-image"),
                     transform = image.style.transform,
-                    currentDeg = +transform.match(/rotate\((\d+)deg\)/)[1]
-                ;
+                    currentDeg = +transform.match(/rotate\((\d+)deg\)/)[1];
                 if (scale !== undefined && rotate !== undefined && x !== undefined && y !== undefined) {
+                	imageCropper.cropit('imageSrc', "");
                     //设置图像的加载缩放
                     imageCropper.cropit('zoom', scale);
                     //旋转角度
@@ -109,7 +113,8 @@
         watch: {
             imgSrc(val, oldVal) {
                 if (val) {
-                    Indicator.open();
+
+//                  Indicator.open();
                     const {
                         imgSize
                     } = this;
@@ -132,7 +137,7 @@
                 width: 200,
                 height: 200,
                 onImageLoaded(){
-                    Indicator.close();
+//                  Indicator.close();
                     let {initialCrop} = vm;
                     vm.cropitImg(initialCrop);
 
@@ -140,16 +145,28 @@
 
                     imgIsChanged = false;
                 },
-                onOffsetChange(){
-                    vm.imgChanged();
+                onOffsetChange(){               		
+                   vm.imgChanged();
+                    var imgObj = build();
+                    //dpi 检验
+                    var dpiImg = vm.$store.state.editImgModule.initialCrop;
+                    var scale = dpiImg.thumbnailScale; 
+					var imgWidth = imgObj.width/scale; 
+					var imgHeight= imgObj.height/scale;
+					var minDpiWidth = dpiImg.minDpiWidth;
+					var minDpiHeight = dpiImg.minDpiHeight;	
+					if(imgWidth < minDpiWidth || imgHeight < minDpiHeight){ 
+						$("#editImg .reportNav").show();
+					}else{
+						$("#editImg .reportNav").hide(); 	
+					} 
+					 
                 },
                 onZoomChange(){
                     vm.imgChanged();
                 }
             });
-
             this.$emit('getImageCropper', imageCropper);
-
         }
     }
 </script>
@@ -159,8 +176,20 @@
         font-size: 40px;
         color: #f60;
         text-align: center;
-    }
+        position: relative;
 
+    }
+	#editImg .reportNav{
+		text-align: center;
+		line-height: 40px;
+		color: red;
+		font-size: 0.6rem;
+		background: rgba(0,0,0,0.3);
+	    position: absolute;
+	    top: -110px;
+	    width: 100%;
+		display: none;
+	}
     .cropit-preview {
         background-color: #f8f8f8;
         background-size: cover;

@@ -27,7 +27,7 @@
         		subject:'微信支付'
         	};
         	
-        	Api.car.orderPay(jsons).then(res=>{ 
+        	Api.car.orderPay(jsons).then(res=>{  
         		if(res.data.code === 'success'){
 						if(this.$route.query.paymentType==='WX'){//手机微信支付 
 							wxpay(res.data,function callback(res){ 
@@ -62,17 +62,28 @@
 							}); 
 						}
 					} else {
-						Toast('支付失败');
-        				Api.car.updataOrderStatus({dbId:jsons.dbId, status:1}).then(res=>{
-							if(res.data.code == 'success'){
-								location.href="#orderList"
-							}
-							
-						},err=>{
-							Toast('请求数据失败');
-						})
+						
+                        if(res.data.acquireOpenId && res.data.acquireOpenId === 'Y'){
+                            //Toast('请重新关注');
+                            //Api.user.getUserDbId().then(res=>{
+                                //请求微信授权
+                            //    window.location.href=res.data.tokenUrl
+                            //})
+                            window.location.href= res.data.codeUrl;
+                        } else {
+                            Toast('支付失败');
+                            Api.car.updataOrderStatus({dbId:jsons.dbId, status:1}).then(res=>{
+                            if(res.data.code == 'success'){
+                                location.href="#orderList"
+                            }
+                            
+                            },err=>{
+                                Toast('请求数据失败');
+                            })
+                        }
+        				
 					}
-        	},err=>{
+        	},err=>{ 
         		Toast('请求数据失败');
         	})
         }

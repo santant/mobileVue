@@ -31,7 +31,7 @@
                    >p{
                        float: left;
                        height: 100%;
-                       width: 2.98rem;
+                       width: 3rem;
                        margin-left: 0.66rem;
                        line-height: 2.4rem;
                       text-align:justify;
@@ -181,7 +181,7 @@
                              box-sizing: border-box;
                            
                             >img{
-                                max-width: 5.5625rem;
+                                max-width: 5.5rem;
                                 max-height: 5.5625rem;
                                 position: absolute;
                                 top: 0;
@@ -364,23 +364,21 @@
                         margin-left: 0;
                         position: relative;
                         >p{
-                            width: 0.7rem;
-                            height: 0.7rem;
+                            width: 0.875rem;
+                            height: 0.875rem;
                             position: absolute;
                             top: 50%;
                             margin-top: -0.35rem;
                            
                             >i{
-                                display: block;
                                 color: #4ecd31;
-                                display: none;
                                 position: absolute;
                                 top: 0;
                                 left: 0;
                                 right: 0;
                                 bottom: 0;
                                 margin: auto auto;
-                              
+                               font-size: 1.1rem;
                             }
                         }
                     }
@@ -414,7 +412,7 @@
                                 font-size: 0.69rem;
                                 margin-top: 0.26rem;
                                 >span{
-                                    margin-left: 0.2rem;
+                                    //margin-left: 0.2rem;
                                 }
                                 >span:nth-child(1){
                                     margin-left: 0;
@@ -490,23 +488,21 @@
                             width: 1rem;
                           
                              >p{
-                                width: 0.7rem;
-                                height: 0.7rem;
+                                width: 0.875rem;
+                                height: 0.875rem;
                                 position: absolute;
                                 top: 50%;
                                 margin-top: -0.35rem;
                                
                                 >i{
-                                    display: block;
                                     color: #4ecd31;
-                                    display: none;
                                     position: absolute;
                                     top: 0;
                                     left: 0;
                                     right: 0;
                                     bottom: 0;
                                     margin: auto auto;
-                                  
+                                    font-size: 1.1rem;
                                 }
                             }
                         }
@@ -707,7 +703,7 @@
                         }
                         >span:nth-child(1){
                             float: left;
-                            width: 2.98rem;
+                            width: 3.98rem;
                             height: 100%;
                             line-height: 2.4rem;
                             text-align:justify;
@@ -808,7 +804,7 @@
 #khSelect{
     width: 100%;
     height: 100%;
-   
+    background:#eee;
    .bbsImg{
         width: 100%;
         position: relative;
@@ -847,6 +843,10 @@
                     width: 100%;
                     height: 100%;
                     position: relative;
+                    overflow: hidden;
+                    >img{
+                        position: absolute;
+                    }
                     >span{
                        width: 4rem;
                        height: 1.6rem;
@@ -861,6 +861,7 @@
                        margin: auto auto;
                        color: #fff;
                        font-size: 0.69rem;
+                       z-index: 9;
                        
                     }
                 }
@@ -877,6 +878,16 @@
             top: 0;
             margin: auto auto;
         }
+   }
+   .addCarBtn{
+       width: 10rem;
+       height: 2.4rem;
+       font-size: 0.8rem;
+       color: #333;
+       text-align: center;
+       margin: 0 auto;
+       line-height: 2.4rem;
+       border: 1px solid #999;
    }
       //选择
     .slect_dl{
@@ -977,4 +988,176 @@
         float: right;
         margin-right:  1.2rem;
     }
+}
+#tlEdit{
+    width: 100%;
+    height: 100%;
+    .tlEditTop{
+        width: 100%;
+        height: 2rem;
+        background-color: black;
+        color: #c7c7c7;
+        font-size: 0.77295rem;
+        text-align: center;
+        >span{
+            line-height: 2rem;
+            
+        }
+    }
+    .tlEditContent{
+        width: 100%;
+        min-height: 14rem;
+        position: relative;
+        margin-top: 1rem;
+        .tl_img_195X145{
+           width: 11.8684rem;
+            height: 8.8252rem;
+            margin: 1.5rem;
+            display: block;
+            margin: 0 auto;
+            margin-top: 1rem;
+        }
+        .tl_img_145X195{
+            width: 8.8252rem;
+            height: 11.8684rem;
+            margin: 1.5rem;
+            display: block;
+            margin: 0 auto;
+            margin-top: 1rem;
+        }
+        .tl_195X145{
+            width: 12rem;
+            height: 8.96rem;
+             position: relative;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            margin: auto auto;
+            background-color: #b5b5b5;
+            overflow: hidden;
+//          background: url('http://image2.artup.com/resources/static/img/taili/taili_bg.jpg');
+            >img{
+                position: absolute;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                margin: auto auto;
+               
+            }
+            .myImgBox{
+                width: 100%;
+                height: 100%;
+                text-align: center;
+                line-height: 8.825rem;
+                display: none;
+                overflow: hidden;
+                >img{
+                    width: 100%;
+                }
+                >span{
+                    width: 4rem;
+                    height: 1.6rem;
+                    text-align: center;
+                    line-height: 1.6rem;
+                    background: rgba(0, 0, 0, 0.5);
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                    margin: auto auto;
+                    color: #fff;
+                    font-size: 0.69rem;
+                    z-index: 9;
+                }
+            }
+           
+        }
+        
+        .tl_145X195{
+               width: 9rem;
+               height: 12.16rem;
+               top: 0;
+                right: 0;
+                bottom: 0;
+                left: 0;
+                margin: auto auto;
+                background-color: #b5b5b5;
+                position: relative;
+                overflow: hidden;
+    //          background: url('http://image2.artup.com/resources/static/img/taili/taili_bg.jpg');
+                >img{
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                    margin: auto auto;
+                }
+             .myImgBox{
+                width: 100%;
+                height: 100%;
+                text-align: center;
+                line-height: 11.8684rem;
+                display: none;
+                overflow: hidden;
+                >img{
+                     width: 100%;
+                }
+                 >span{
+                    width: 4rem;
+                    height: 1.6rem;
+                    text-align: center;
+                    line-height: 1.6rem;
+                    background: rgba(0, 0, 0, 0.5);
+                    position: absolute;
+                    top: 0;
+                    right: 0;
+                    bottom: 0;
+                    left: 0;
+                    margin: auto auto;
+                    color: #fff;
+                    font-size: 0.69rem;
+                    z-index: 9;
+                }
+                
+            }
+        }
+         .tiData{
+               
+                bottom: 0rem;
+                text-align: center;
+                font-size: 1rem;
+                width: 100%;
+                margin-top: 1rem;
+            }
+    }
+}
+//设置封底图片大小
+.tl_img_195X145{
+   width: 11.8684rem;
+    height: 8.8252rem;
+    margin: 1.5rem;
+    display: block;
+    margin: 0 auto;
+    margin-top: 1rem;
+}
+.tl_img_145X195{
+    width: 8.8252rem;
+    height: 11.8684rem;
+    margin: 1.5rem;
+    display: block;
+    margin: 0 auto;
+    margin-top: 1rem;
+}
+//结束
+#hbSelect{
+    width: 100%;
+    height: 100%;
+    background: red;
+}
+.bgrq{
+    width: 4rem; color: #fff; text-align: center;margin-left: 1rem;
 }

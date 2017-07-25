@@ -3,6 +3,7 @@
 					//var imageData = $('.image-editor').cropit('export');
 					//选择图片
 					var myImg = document.querySelector(".cropit-preview-image");
+//					var matrix = $(myImg).css("transform");
 					var matrix = window.getComputedStyle(myImg).transform;
 					//框的宽度
 					var kuangWidth = $('.cropit-preview-image-container').width();
@@ -12,19 +13,21 @@
 					var arr = matrix.replace(/[^0-9\-\.,]/g, '').split(',')
 					//X轴方向的偏移量
 					var deviationX = Number(arr[4]);
-					//Y轴偏移量
+//					//Y轴偏移量
 					var deviationY = Number(arr[5]);
-					//定义要判断的字符串
-					var str = angule;
-					//定义正则表达式对象，\表示转义字符,原点表示任意字符，+表示出现次数至少1次，igm表示忽略大小写，且全局匹配
-					pattern = new RegExp("\\((.| )+?\\)", "igm");
-					//取出匹配正则表达式的内容
-					var newStr = str.match(pattern);
-					//缩放比例
-					var scale = Number(newStr[1].replace(/\(/,"").replace(/\)/,""))
-				    //旋转角度
-				    var rotat = Number(newStr[2].replace(/\(/,"").replace(/\)/,"").replace("deg",""));
-				    //判断偏移量第一次的没有偏移的时候如果不是number是NaN的时候手动赋值0
+//					//定义要判断的字符串
+//					var str = angule;
+//					//定义正则表达式对象，\表示转义字符,原点表示任意字符，+表示出现次数至少1次，igm表示忽略大小写，且全局匹配
+//					pattern = new RegExp("\\((.| )+?\\)", "igm");
+//					//取出匹配正则表达式的内容
+//					var newStr = str.match(pattern);
+
+//					//缩放比例
+					var scale = Number(arr[1].replace(/\(/,"").replace(/\)/,""))
+
+//				    //旋转角度
+				    var rotat = Number(arr[2].replace(/\(/,"").replace(/\)/,"").replace("deg",""));
+//				    //判断偏移量第一次的没有偏移的时候如果不是number是NaN的时候手动赋值0
 				    if(isNaN(deviationX)){
 				       deviationX = 0;
 				    }if(isNaN(deviationY)){

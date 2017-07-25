@@ -4,7 +4,7 @@
 		   <router-link to=""  v-tap="{ methods:linkGo }" slot="left">
 		    <mt-button icon="back">返回</mt-button>
 		  </router-link>
-		  <mt-button icon="more" slot="right"></mt-button>
+		  <mt-button icon="" slot="right"></mt-button>
 		</mt-header>
 		<a class="telePhone" href="tel:400-6688-688">客服电话：400-6688-688</a>
 		<ul class="userList">
@@ -21,19 +21,19 @@
 				 </router-link>
 			</li>
 			<li>
-				<router-link to="Address">
+				<router-link to="Address?dzgl=grzx">
 					 <i class="icon iconfont">&#xe601;</i>
 				 	<p>地址管理</p>
 				 </router-link>
 			</li>
-			<li>
+			<li v-tap="{methods:clearStore}">
 				<router-link to="">
 				 	<i class="icon iconfont">&#xe620;</i>
-					 <p>优惠卷</p>
+					 <p >清理缓存</p>
 				 </router-link>
 			</li>
 			<li>
-				<router-link to="">
+				<router-link to="material">
 					 <i class="icon iconfont">&#xe603;</i>
 				 	<p>我的素材库</p>
 				 </router-link>
@@ -60,6 +60,10 @@ export default {
     methods:{
 		linkGo(){
 			this.vurRouterGo();
+		},
+		clearStore(){	
+			sessionStorage.clear();
+			localStorage.clear();
 		}
     },
     mounted(){

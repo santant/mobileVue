@@ -9,24 +9,45 @@ Vue.filter("json", function(value) {   //全局方法 Vue.filter() 注册一个�
    return JSON.stringify(value);
 });
 Vue.filter("splitSku",function(value){
-	if (value) {
+	if (value ) {
 		var arr = value.split('.');
-		var newArr = [];
-		for(var i=0; i<arr.length-2; i++){
-			newArr.push(arr[i])
-		}
-		return newArr.join('.');
+//		if(arr.length > 2){
+//			var newArr = [];
+//			for(var i=0; i<arr.length-2; i++){
+//				newArr.push(arr[i])
+//			}
+//			return newArr.join('.');
+//		}else{
+//			return arr[0];
+//		}
+		return arr[0];
+		
 	}
 });
 Vue.filter("splitSkuLast",function(value){
 	if (value) {
 		var arr = value.split('.');
-		return arr[arr.length - 1];
+		return arr.slice(1,arr.length).join('.')
 	}
 })
+
 Vue.filter("splitAddress",function(value){
 	if (value) {
 		
 		return value.length > 10 ? value.substr(0,10).concat('...'):value;
 	}
+})
+
+Vue.filter("toFixedTwo",function(value){
+	if (value) {
+		
+		return parseFloat(value.toFixed(2));
+	}
+})
+Vue.filter('subStr',function(value){
+
+	if(value){
+		return value.length > 9 ? value.substr(0,9).concat('...'):value; 
+	}
+	
 })

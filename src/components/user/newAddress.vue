@@ -2,8 +2,8 @@
 	<div id="newAddress">
 		<!--头-->
 		<mt-header title="收货地址">
-		  <router-link to="/" slot="left">
-		    <mt-button icon="back"></mt-button>
+		  <router-link to="" v-tap="{methods:linkGo}" slot="left">
+		    <mt-button icon="back">返回</mt-button>
 		  </router-link>
 		  <mt-button icon=""  slot="right"></mt-button>
 		</mt-header>
@@ -33,7 +33,7 @@
 				<li>
 					<div class="listTable">
 						<p>详细地址</p>
-						<textarea id="address" v-model="datas.address" name="address" placeholder="请填写详细地址 不少于8个字" rows="" cols=""></textarea>
+						<textarea id="address" v-model="datas.address" name="address" placeholder="请填写详细地址" rows="" cols=""></textarea>
 						
 					</div>
 				</li>
@@ -100,6 +100,7 @@
 					Toast('详细地址不能为空!');
 					return;
 				}
+					
 				var reg = /^1[3|4|5|7|8]\d{9}$/;
 		　　　　if (!reg.test(this.datas.mobile)){
 					Toast('请输入正确的手机号码!');
@@ -124,7 +125,13 @@
 					/*确认提交*/
 					Api.address.updateAddress(jsons).then(res=>{
 						console.log(res);
-						location.href="#address";
+						if( this.$route.query.dzgl){
+							location.href="#address?dzgl=grzx";
+						}else{
+							location.href="#payOrder?openId="+this.$route.query.openId+"&orderDbId="+this.$route.query.orderDbId+"&userDbId="+localStorage.getItem("userDbId")
+							
+						}
+						
 					},err=>{
 						Toast('数据请求错误');
 					})
@@ -144,7 +151,8 @@
 							if(this.$route.query.orderDbId){
 								location.href="#payOrder?openId="+this.$route.query.openId+"&orderDbId="+this.$route.query.orderDbId+"&userDbId="+localStorage.getItem("userDbId")
 							}else{
-								location.href="#address";
+								
+								location.href="#address?openId="+this.$route.query.openId+"&orderDbId="+this.$route.query.orderDbId+"&userDbId="+localStorage.getItem("userDbId");
 							}
 						}
 					},err=>{
@@ -152,10 +160,15 @@
 					})
 				}
 				console.log(this.datas)
+			},
+	        linkGo(){
+				this.vurRouterGo();
 			}
 		
 		},
 		mounted(){
+			$('body').height($('body')[0].clientHeight)
+			
 			/*初始化地区数据*/
 			var area2 = new LArea();
 		    area2.init({

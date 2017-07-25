@@ -12,7 +12,7 @@
 
 /*定义宝宝书八个板式模板*/
 var htmlData={
-	bbs1:'<div bsdata = "1" imgNum="1"  class="bbs01 bbsA bbsClass marginAuto"><div class="myImgBox"><img src="" alt="" /><span nm="1"  type="1" class="editImg">编辑</span><a></a></div><img nm="1"  type="1" editCnfName="baobaoshu_170-235_24_single"  @click="ActionsheetIn"  src="http://image2.artup.com/resources/static/img/p_sucai_02.jpg"  class="sucaiClass" alt="" /></div><div class="textarea"><p nm="1" type="1" editCnfName="baobaoshu_170-235_24_single"  class="classP"></p></div>',
+	bbs1:'<div bsdata = "1" imgNum="1"  class="bbs01  bbsA bbsClass marginAuto"><div class="myImgBox"><img src="" alt="" /><span nm="1"  type="1" class="editImg">编辑</span><a></a></div><img nm="1"  type="1" editCnfName="baobaoshu_170-235_24_single"  @click="ActionsheetIn"  src="http://image2.artup.com/resources/static/img/p_sucai_02.jpg"  class="sucaiClass" alt="" /></div><div class="textarea"><p nm="1" type="1" editCnfName="baobaoshu_170-235_24_single"  class="classP"></p></div>',
 	bbs2:'<div bsdata = "2"  imgNum="1" class="bbs02 bbsA bbsClass marginAuto"><div class="myImgBox"><img src="" alt="" /><span nm="1"  type="2" class="editImg">编辑</span><a></a></div><img nm="1"  type="2" editCnfName="baobaoshu_170-235_24_single"  src="http://image2.artup.com/resources/static/img/p_sucai_02.jpg"  class="sucaiClass" alt="" /></div><div class="textarea"><p nm="1" type="2" editCnfName="baobaoshu_170-235_24_single" class="classP"></p></div>',
 	bbs3:'<div bsdata = "3" imgNum="1" class="bbs03 bbsA bbsClass marginAuto"><div class="myImgBox"><img src="" alt="" /><span nm="1"  type="3" class="editImg">编辑</span><a></a></div><img nm="1" type="3" editCnfName="baobaoshu_170-235_24_single"   src="http://image2.artup.com/resources/static/img/p_sucai_02.jpg"  class="sucaiClass" alt="" /></div>',
 	bbs4:'<div bsdata = "4" imgNum="1" class="bbs04 bbsA bbsClass marginAuto"><div class="myImgBox"><img src="" alt="" /><span nm="1"  type="4" class="editImg">编辑</span><a></a></div><img nm="1" type="4"  editCnfName="baobaoshu_170-235_24_single"  src="http://image2.artup.com/resources/static/img/p_sucai_02.jpg"  class="sucaiClass" alt="" /></div><div class="textarea"><p nm="1"  type="4" editCnfName="baobaoshu_170-235_24_single"  class="classP"></p></div>',
@@ -157,7 +157,7 @@ function dragThumb(cs_src, cs_divdom) { //cs_src图片的节点,框型（固定d
 	var oProportionWidth = boxWidth/imgWidth;
 	//原图和框的比例（高）
 	var oProportionHeight =boxHeight/imgHeight;
-	
+	//alert(boxWidth)
 	//得到换算的最终比例mul
 	var mul;
 	if (oProportionWidth>oProportionHeight) {
@@ -200,12 +200,12 @@ function checkColor(shupi,dom1,dom2,dom3){
 			break;
 			case "智慧蓝":
 				dom1.addClass('fmLs');
-				dom2.addClass('fdLv');
+				dom2.addClass('fdLs');
 				dom3.addClass('feLs');
 			break;
 			case "活力橙":
 				dom1.addClass('fmCs');
-				dom2.addClass('fdLv');
+				dom2.addClass('fdCs');
 				dom3.addClass('feCs');
 			break;
 			case "欢乐红":

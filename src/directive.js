@@ -4,8 +4,7 @@ import Vue from 'vue'
 var DomHeight = Vue.directive('DomHeight', {
   // 当绑定元素插入到 DOM 中。
   inserted: function (el) { //拿到dom动态算出高度
-    var oH = $(document).height()- $(el).height();
-    console.log( $("#index .swipeDiv"))
+    var oH = $(window).height()- $(el).height();
     $("#index .swipeDiv").css("height",oH+'px');
   }
 })
