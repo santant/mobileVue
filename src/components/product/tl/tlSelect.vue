@@ -18,18 +18,45 @@
 				<div   v-model="popupVisible" v-tap='{methods:selects}' class="dd_slect size dd_slectWidth dd_active">
 					{{years}}
 				</div>
-				<div  class="dd_slect size dd_slectWidth ">
+				<div v-model="popupVisible" v-tap='{methods:selects}' class="dd_slect size dd_slectWidth ">
 					{{month}}
 				</div>
 				
 			</dd>
 		</dl>
-		<mt-popup
-			  v-model="popupVisible"
-			  popup-transition="popup-fade">
+		<dl class="slect_dl">
+			<dt>
+				选择尺寸
+			</dt>
+			<dd>
+				<div  class="dd_slect size dd_slectWidth dd_active">
+					195mmx145mm
+				</div>
+				<div  class="dd_slect size dd_slectWidth ">
+					145mmx195mm
+				</div>
+				
+			</dd>
+		</dl>
+		<dl class="slect_dl">
+			<dt>
+				选择颜色
+			</dt>
+			<dd>
+				<div  class="dd_slect size dd_slectWidth dd_active">
+					白色
+				</div>
+				<div  class="dd_slect size dd_slectWidth ">
+					咖啡色
+				</div>
+				
+			</dd>
+		</dl>
+		<mt-popup style='width: 100%;' v-model="popupVisible" popup-transition="popup-up" position="bottom">
+			
 			<mt-picker :slots="slots" @change="onValuesChange"></mt-picker>
 		</mt-popup>
-		<mt-picker :slots="slots" @change="onValuesChange"></mt-picker>
+		
 		<i style="height: 2.9375rem; display: block; width: 100%;"></i>
 		<div class="cart_btn">			
 			<div class="price">
@@ -54,7 +81,7 @@
 				slots: [
 			        {
 			          flex: 1,
-			          values: ['2017',''],
+			          values: ['2017'],
 			          className: 'slot1',
 			          textAlign: 'right'
 			        }, {
@@ -63,7 +90,7 @@
 			          className: 'slot2'
 			        }, {
 			          flex: 1,
-			          values: ['1', '2', '3', '4', '5', '6'],
+			          values: ['1', '2', '3', '4', '5', '6','7','8','9','10','11','12'],
 			          className: 'slot3',
 			          textAlign: 'left'
 			        }
@@ -90,6 +117,7 @@
 		   	 
 		   },
 		   selects(){
+		   
 		   	this.popupVisible = !this.popupVisible;
 		   }
 		},
@@ -100,9 +128,5 @@
 </script>
 
 <style>
-	.sele{
-		position: fixed;
-		bottom: 0;
-		left: 0;
-	}
+	
 </style>
